@@ -25,6 +25,7 @@ class NewVisitorTest(unittest.TestCase): # 1; метод, который Seleniu
         # Она видит, что заголовок и шапка страницы говорят о списках
         # неотложных дел
         self.assertIn('To-Do', self.browser.title) 
+
         header_text = self.browser.find_element_by_tag_name('h1').text # 1; методов, которые Selenium предоставляет для исследования веб-страниц; вернет несколько элементов, а не один)
         self.assertIn('To-Do', header_text)
 
@@ -47,7 +48,8 @@ class NewVisitorTest(unittest.TestCase): # 1; метод, который Seleniu
         table = self.browser.find_element_by_id('id_list_table')
         rows = table.find_elements_by_tag_name('tr') # 1
         self.assertTrue(
-            any(row.text == '1: Купить павлиньи перья' for row in rows)
+            any(row.text == '1: Купить павлиньи перья' for row in rows),
+            "Новый элемент списка не появился в таблице"
         )
 
         # Текстовое поле по-прежнему приглашает ее добавить еще один элемент.

@@ -11,3 +11,9 @@ class HomePageTest(TestCase):
         '''тест: используется домашний шаблон'''
         response = self.client.get('/')
         self.assertTemplateUsed(response, 'lists/home.html') # тестовый клиент Django; имеет недостатки (т.к. есть разница между полноизолированными модульными тестами и интегрированными тестами)
+
+    def test_can_save_a_POST_request(self):
+        '''тест: можно сохранить post-запрос'''
+        response = self.client.post('/', data={'item_text': 'Новый элемент списка'})
+        self.assertIn('Новый элемент списка', response.content.decode())
+        self.assertTemplateUsed(response, 'lists/home.html')

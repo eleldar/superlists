@@ -50,6 +50,7 @@ class NewVisitorTest(unittest.TestCase):
         # содержит "1: Купить павлиньи перья" в качестве элемента списка
         inputbox.send_keys(Keys.ENTER)
         time.sleep(5)
+
         self.check_for_row_in_list_table('1: Купить павлиньи перья')
 
         # Текстовое поле по-прежнему приглашает ее добавить еще один элемент.

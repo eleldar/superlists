@@ -3,9 +3,10 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import time
-import unittest
+from django.test import LiveServerTestCase #import unittest
 
-class NewVisitorTest(unittest.TestCase):
+
+class NewVisitorTest(LiveServerTestCase):
     '''Тест нового посетителя'''
 
     def setUp(self):
@@ -26,7 +27,7 @@ class NewVisitorTest(unittest.TestCase):
         '''тест: можно начать список и получить его позже'''
         # Лена слышала про крутое новое онлайн-приложение со списком
         # неотложных дел. Она решает оценить его домашнюю страницу
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
 
         # Она видит, что заголовок и шапка страницы говорят о списках
         # неотложных дел
@@ -72,5 +73,3 @@ class NewVisitorTest(unittest.TestCase):
         # Она посещает этот URL-адрес – ее список по-прежнему там.
 
         # Удовлетворенная, она снова ложится спать
-if __name__ == '__main__':
-    unittest.main(warnings='ignore') # warnings='ignore' подавляет излишние предупреждающие сообщения Resourcewarning , которые выдавались во время написания

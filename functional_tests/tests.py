@@ -23,13 +23,13 @@ class NewVisitorTest(LiveServerTestCase):
         '''Размонтирование'''
         self.browser.quit()
 
-   # def check_for_row_in_list_table(self, row_text):
-   #     '''подтверждение строки в таблице списка'''
-   #     table = self.browser.find_element_by_id('id_list_table')
-   #     rows = table.find_elements_by_tag_name('tr')
-   #     self.assertIn(row_text, [row.text for row in rows])
+    # def check_for_row_in_list_table(self, row_text):
+    #     '''подтверждение строки в таблице списка'''
+    #     table = self.browser.find_element_by_id('id_list_table')
+    #     rows = table.find_elements_by_tag_name('tr')
+    #     self.assertIn(row_text, [row.text for row in rows])
     def wait_for_row_in_list_table(self, row_text):
-        '''ождать строку в таблице списка'''
+        '''ожидать строку в таблице списка'''
         start_time = time.time()
         while True:
             try:
@@ -53,7 +53,7 @@ class NewVisitorTest(LiveServerTestCase):
 
 
     def test_can_start_a_list_and_retrieve_it_later(self):
-        '''тест: можно начать список и получить его позже'''
+        '''тест: можно начать список для одного пользователя'''
         # Лена слышала про крутое новое онлайн-приложение со списком
         # неотложных дел. Она решает оценить его домашнюю страницу
         self.browser.get(self.live_server_url)
@@ -91,11 +91,49 @@ class NewVisitorTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('1: Купить павлиньи перья')
         self.wait_for_row_in_list_table('2: Сделать мушку из павлиньих перьев')
 
-        # Лене интересно, запомнит ли сайт ее список. Далее она видит, что
-        # сайт сгенерировал для нее уникальный URL-адрес – об этом
-        # выводится небольшой текст с объяснениями.
-        self.fail('Закончить тест!')
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        '''тест: многочисленные пользователи могут начать списки по разным URL'''
 
-        # Она посещает этот URL-адрес – ее список по-прежнему там.
+        # Лена начинает новый список
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Купить павлиньи перья')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Купить павлиньи перья')
 
-        # Удовлетворенная, она снова ложится спать
+        # Лена замечает, что ее список имеет уникальный URL-адрес
+        helen_list_url = self.browser.current_url
+        self.assertRegex(helen_list_url, '/lists/.+') # assertRegex – вспомогательная функция из unittest, которая проверяет, 
+                                                      # соответствует ли строка регулярному выражению; 
+                                                      # используется, чтобы проверить реализацию новой RESTʼовской конструкции.
+
+        # Теперь новый пользователь, Эльдар, приходит на сайт.
+        ## Мы используем новый сеанс браузера, тем самым обеспечивая, чтобы никакая
+        ## информация от Эдит не прошла через данные cookie и пр.
+        self.browser.quit()
+        swlf.browser = webdriver.Firefox()
+
+        # Эльдар посещает домашнюю страницу. Нет никаких признаков списка Лены
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Купить павлиньи перья', page_text)
+        self.assertNotIn('Сделать мушку', page_text)
+
+        # Эльдар начинает новый список, вводя новый элемент
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Купить молоко')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Купить молоко')
+
+        # Эльдар получает уникальный URL-адрес
+        eldar_list_url = self.browser.current_url
+        self.assertRegex(eldar_list_url, '/lists/.+')
+        self.assertNotEqual(eldar_list_url, helen_list_url)
+
+        # Опять-таки, нет ни следа от списка Лены
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Купить павлиньи перья', page_text)
+        self.assertIn('Купить молоко', page_text)
+
+
+        # Удовлетворенные, они оба ложатся спать

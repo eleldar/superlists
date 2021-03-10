@@ -104,7 +104,7 @@ class NewVisitorTest(LiveServerTestCase):
         ## Мы используем новый сеанс браузера, тем самым обеспечивая, чтобы никакая
         ## информация от Эдит не прошла через данные cookie и пр.
         self.browser.quit()
-        swlf.browser = webdriver.Firefox()
+        self.browser = webdriver.Firefox()
 
         # Эльдар посещает домашнюю страницу. Нет никаких признаков списка Лены
         self.browser.get(self.live_server_url)
@@ -130,3 +130,4 @@ class NewVisitorTest(LiveServerTestCase):
 
 
         # Удовлетворенные, они оба ложатся спать
+        self.browser.quit()

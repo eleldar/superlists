@@ -11,7 +11,8 @@ class HomePageTest(TestCase):
     def test_uses_home_template(self):
         '''тест: используется домашний шаблон'''
         response = self.client.get('/')
-        self.assertTemplateUsed(response, 'lists/home.html') # тестовый клиент Django; имеет недостатки (т.к. есть разница между полноизолированными модульными тестами и интегрированными тестами)
+        self.assertTemplateUsed(response, 'lists/home.html') # тестовый клиент Django;
+                                                             # имеет недостатки (т.к. есть разница между полноизолированными модульными тестами и интегрированными тестами)
 
     def test_can_save_a_POST_request(self):
         '''тест: можно сохранить post-запрос'''
@@ -30,16 +31,6 @@ class HomePageTest(TestCase):
         '''тест: сохраняет элементы, только когда нужно'''
         self.client.get('/')
         self.assertEqual(Item.objects.count(), 0)
-
-    def test_displays_all_list_items(self):
-        '''тест: отображаются все элементы списка'''
-        Item.objects.create(text='Элемент 1')
-        Item.objects.create(text='Элемент 2')
-
-        response = self.client.get('/')
-
-        self.assertIn('Элемент 1', response.content.decode())
-        self.assertIn('Элемент 2', response.content.decode())
 
 class ItemModelTest(TestCase):
     '''тест модели элемента списка'''
@@ -63,6 +54,11 @@ class ItemModelTest(TestCase):
 
 class ListViewTest(TestCase):
     '''тест представления списка'''
+    def test_uses_list_template(self):
+        '''тест: используется шаблон списка'''
+        response = self.client.get('/lists/uniq-list/')
+        self.assertTemplateUsed(response, 'lists/list.html') # assertTemplateUsed – одна из наиболее 
+                                                             # полезных функций тестового клиента Django
 
     def test_displays_all_items(self):
         '''тест: отображаются все элементы списка'''

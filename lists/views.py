@@ -12,7 +12,7 @@ def home_page(request):
     return render(request, 'lists/home.html', {'items': items})
 
 def view_list(request):
-    '''представление списка'''
+    '''новый список'''
     items = Item.objects.all()
-    return render(request, 'lists/home.html', {'items': items})
+    return render(request, 'lists/list.html', {'items': items})
 

@@ -23,23 +23,16 @@ class NewVisitorTest(LiveServerTestCase):
         '''Размонтирование'''
         self.browser.quit()
 
-    # def check_for_row_in_list_table(self, row_text):
-    #     '''подтверждение строки в таблице списка'''
-    #     table = self.browser.find_element_by_id('id_list_table')
-    #     rows = table.find_elements_by_tag_name('tr')
-    #     self.assertIn(row_text, [row.text for row in rows])
     def wait_for_row_in_list_table(self, row_text):
         '''ожидать строку в таблице списка'''
         start_time = time.time()
         while True:
             try:
-                # row_text = 'foo' # специально для ошибки
-                tag_id = 'id_list_table' #'id_nothing' # специально для ошибки
+                tag_id = 'id_list_table'
                 table = self.browser.find_element_by_id(tag_id)
                 rows = table.find_elements_by_tag_name('tr')
                 self.assertIn(row_text, [row.text for row in rows])
-                return # если выполняется тестирующее утверждение их проходит, то
-                       # возвращаемся из функции и выходим из цикла
+                return 
             except(AssertionError, WebDriverException) as e: # отлавливаем два типа исключений:
                                                              # 1. WebDriverException для случая, когдастраница не загрузилась и
                                                              # Selenium не может найти табличный элемент на странице,

@@ -24,7 +24,7 @@ class HomePageTest(TestCase):
         '''тест: можно сохранить post-запрос'''
         response = self.client.post('/', data={'item_text': 'Новый элемент списка'})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/')
+        self.assertEqual(response['location'], '/lists/uniq-list/')
 
     def test_only_saves_items_when_necessary(self):
         '''тест: сохраняет элементы, только когда нужно'''
@@ -60,3 +60,16 @@ class ItemModelTest(TestCase):
         second_saved_item = saved_items[1]
         self.assertEqual(first_saved_item.text, 'Первый (какой-нибудь) элемент списка')
         self.assertEqual(second_saved_item.text, 'Второй элемент списка')
+
+class ListViewTest(TestCase):
+    '''тест представления списка'''
+
+    def test_displays_all_items(self):
+        '''тест: отображаются все элементы списка'''
+        Item.objects.create(text='Элемент 1')
+        Item.objects.create(text='Элемент 2')
+
+        response = self.client.get('/lists/uniq-list/')
+
+        self.assertContains(response, 'Элемент 1')
+        self.assertContains(response, 'Элемент 2')

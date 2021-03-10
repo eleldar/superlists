@@ -8,8 +8,7 @@ def home_page(request):
         Item.objects.create(text=request.POST['item_text']) # создание нового объекта Item без необходимости вызывать метод .save()
         return redirect('/lists/uniq-list/')
 
-    items = Item.objects.all()
-    return render(request, 'lists/home.html', {'items': items})
+    return render(request, 'lists/home.html')
 
 def view_list(request):
     '''новый список'''

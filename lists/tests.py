@@ -14,24 +14,6 @@ class HomePageTest(TestCase):
         self.assertTemplateUsed(response, 'lists/home.html') # тестовый клиент Django;
                                                              # имеет недостатки (т.к. есть разница между полноизолированными модульными тестами и интегрированными тестами)
 
-    def test_can_save_a_POST_request(self):
-        '''тест: можно сохранить post-запрос'''
-        response = self.client.post('/', data={'item_text': 'Новый элемент списка'})
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, 'Новый элемент списка')
-
-    def test_redirects_after_POST(self):
-        '''тест: можно сохранить post-запрос'''
-        response = self.client.post('/', data={'item_text': 'Новый элемент списка'})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/lists/uniq-list/')
-
-    def test_only_saves_items_when_necessary(self):
-        '''тест: сохраняет элементы, только когда нужно'''
-        self.client.get('/')
-        self.assertEqual(Item.objects.count(), 0)
-
 class ItemModelTest(TestCase):
     '''тест модели элемента списка'''
     def test_saving_and_retrieving_items(self):
@@ -69,3 +51,23 @@ class ListViewTest(TestCase):
 
         self.assertContains(response, 'Элемент 1')
         self.assertContains(response, 'Элемент 2')
+
+class NewListTest(TestCase):
+    '''тест нового списка'''
+
+    def test_can_save_a_POST_request(self):
+        '''тест: можно сохранить post-запрос'''
+        self.client.post('/lists/new', data={'item_text': 'Новый элемент списка'})
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'Новый элемент списка')
+
+    def test_redirect_after_POST(self):
+        '''тест: переадресует после post-запроса'''
+        response = self.client.post('/lists/new', data={'item_text': 'Новый элемент списка'}) # /new без закрывающей косой черты.
+                                                                                              # используется форма записи, суть которой в том, 
+                                                                                              # что URL-адреса без такой черты являются 
+                                                                                              # URL-адресами «действия», которое изменяет базу данных
+        self.assertRedirects(response, '/lists/uniq-list/') # новый метод тестового клиента Django; заменяет 2 утверждения:
+                                                            #self.assertEqual(response.status_code, 302)
+                                                            #self.assertEqual(response['location'], '/lists/uniq-list/')

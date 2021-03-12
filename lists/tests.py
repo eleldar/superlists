@@ -48,20 +48,36 @@ class ListViewTest(TestCase):
     '''тест представления списка'''
     def test_uses_list_template(self):
         '''тест: используется шаблон списка'''
-        response = self.client.get('/lists/uniq-list/')
+        list_ = List.objects.create()
+        response = self.client.get(f'/lists/{list_.id}/')
         self.assertTemplateUsed(response, 'lists/list.html') # assertTemplateUsed – одна из наиболее 
                                                              # полезных функций тестового клиента Django
 
-    def test_displays_all_items(self):
-        '''тест: отображаются все элементы списка'''
-        list_ = List.objects.create()
-        Item.objects.create(text='Элемент 1', list=list_)
-        Item.objects.create(text='Элемент 2', list=list_)
+    def test_displays_only_items_for_that_list(self):
+        '''тест: отображаются элементы только для этого списка'''
+        correct_list = List.objects.create()
+        Item.objects.create(text='Элемент 1', list=correct_list)
+        Item.objects.create(text='Элемент 2', list=correct_list)
 
-        response = self.client.get('/lists/uniq-list/')
+        other_list = List.objects.create()
+        Item.objects.create(text='Другой элемент 1 из списка', list=other_list)
+        Item.objects.create(text='Другой элемент 2 из списка', list=other_list)
+
+        response = self.client.get(f'/lists/{correct_list.id}/')
 
         self.assertContains(response, 'Элемент 1')
         self.assertContains(response, 'Элемент 2')
+        self.assertNotContains(response, 'Другой элемент 1 из списка')
+        self.assertNotContains(response, 'Другой элемент 2 из списка')
+
+    def test_passes_correct_list_to_template(self):
+        '''тест: передается список в html-шаблон'''
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+        response = self.client.get(f'/lists/{correct_list.id}/')
+        self.assertEqual(response.context['list'], correct_list) # response.context представляет контекст, который мы собираемся передать
+                                                                 # в функцию генерирования HTML render – тестовый клиент Django помещает его в объект response,
+                                                                 # чтобы помочь с тести­рованием
 
 class NewListTest(TestCase):
     '''тест нового списка'''
@@ -75,10 +91,43 @@ class NewListTest(TestCase):
 
     def test_redirect_after_POST(self):
         '''тест: переадресует после post-запроса'''
+        # Этот тест должен сообщать, что представление переадресовывает 
+        # на URL-адрес конкретного нового списка, который оно только что 
+        # создало
         response = self.client.post('/lists/new', data={'item_text': 'Новый элемент списка'}) # /new без закрывающей косой черты.
                                                                                               # используется форма записи, суть которой в том, 
                                                                                               # что URL-адреса без такой черты являются 
                                                                                               # URL-адресами «действия», которое изменяет базу данных
-        self.assertRedirects(response, '/lists/uniq-list/') # новый метод тестового клиента Django; заменяет 2 утверждения:
-                                                            #self.assertEqual(response.status_code, 302)
-                                                            #self.assertEqual(response['location'], '/lists/uniq-list/')
+        new_list = List.objects.first()
+        self.assertRedirects(response, f'/lists/{new_list.id}/') # заменяет 2 утверждения:
+                                                                 # 1. переадресацию
+                                                                 # 2. соответствие адресов
+
+class NewItemTest(TestCase):
+    '''тест нового элемента списка'''
+
+    def test_can_save_a_POST_request_to_an_existing_list(self):
+        '''тест: можно сохранить POST-запрос в существующий список'''
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+
+        self.client.post(
+            f'/lists/{correct_list.id}/add_item',
+            data={'item_text': 'Новый элемент для существующего списка'}
+        )
+
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'Новый элемент для существующего списка')
+        self.assertEqual(new_item.list, correct_list)
+
+    def test_redirect_to_list_view(self):
+        '''тест: переадресуется в представление списка'''
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+
+        response = self.client.post(
+            f'/lists/{correct_list.id}/add_item',
+            data={'item_text': 'Новый элемент для существующего списка'}
+        )
+        self.assertRedirects(response, f'/lists/{correct_list.id}/')

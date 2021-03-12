@@ -20,5 +20,9 @@ from lists import views
 urlpatterns = [
     path('', views.home_page, name='home'),
     path('lists/new', views.new_list, name='new_list'),
-    path('lists/uniq-list/', views.view_list, name='view_list'),
+    re_path(r'^lists/(\d+)/$', views.view_list, name='view_list'), # В Django есть встроенный код для выдачи постоянной переадресации (301), 
+                                                                   # когда кто-то запрашивает URL, который почти верный, за исключением недостающей косой черты;
+                                                                   # при lists/(.+)/ удовлетворяется любая последовательность после lists/;
+                                                                   # применим регулярное выражение \d и заставим шаблон URL-адреса в явном виде захватывать только знаки цифр
+    re_path(r'^lists/(\d+)/add_item$', views.add_item, name='add_item'),
 ]

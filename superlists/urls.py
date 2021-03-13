@@ -14,15 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, re_path
-from lists import views
+from django.urls import include, path, re_path
+from lists import views as list_views # хорошая практика назначать псевдонимы для высокоуровневого urls.py; 
+from lists import urls as list_urls   # позволит, если нужно, импортировать представления и URL-адреса из многочисленных приложений
 
 urlpatterns = [
-    path('', views.home_page, name='home'),
-    path('lists/new', views.new_list, name='new_list'),
-    re_path(r'^lists/(\d+)/$', views.view_list, name='view_list'), # В Django есть встроенный код для выдачи постоянной переадресации (301), 
-                                                                   # когда кто-то запрашивает URL, который почти верный, за исключением недостающей косой черты;
-                                                                   # при lists/(.+)/ удовлетворяется любая последовательность после lists/;
-                                                                   # применим регулярное выражение \d и заставим шаблон URL-адреса в явном виде захватывать только знаки цифр
-    re_path(r'^lists/(\d+)/add_item$', views.add_item, name='add_item'),
+    path('', list_views.home_page, name='home'),
+    re_path(r'^lists/', include(list_urls)), # include может быть частью регулярного выражения в URL как префикс, 
+                                             # который будет применяться ко всем включенным URL-адресам
 ]

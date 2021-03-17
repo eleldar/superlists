@@ -4,7 +4,8 @@ from selenium import webdriver # нужно всегда следить за о�
                                # и, соотвественно, драйвером geckodriver
 from selenium.webdriver.common.keys import Keys
 import time
-from django.test import LiveServerTestCase #import unittest
+#from django.test import LiveServerTestCase #import unittest
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.common.exceptions import WebDriverException
 
 MAX_WAIT = 10 # максимальным количеством времени, которое готовы ожидать. 
@@ -12,7 +13,7 @@ MAX_WAIT = 10 # максимальным количеством времени, 
               # случайных замедлений
 
 
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     '''Тест нового посетителя'''
 
     def setUp(self):

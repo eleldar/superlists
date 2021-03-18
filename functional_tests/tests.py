@@ -81,7 +81,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         self.assertIn('To-Do', self.browser.title)
 
         header_text = self.browser.find_element_by_tag_name('h1').text
-        self.assertIn('Начать новый список неотложных дел', header_text)
+        self.assertIn('Начать новый список дел', header_text)
 
         # Ей сразу же предлагается ввести элемент списка
         inputbox = self.browser.find_element_by_id('id_new_item')

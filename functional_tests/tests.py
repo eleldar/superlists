@@ -7,6 +7,7 @@ import time
 #from django.test import LiveServerTestCase #import unittest
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.common.exceptions import WebDriverException
+import os
 
 MAX_WAIT = 10 # максимальным количеством времени, которое готовы ожидать. 
               # 10 секунд более чем достаточно для отлавливания любых незначительных сбоев или
@@ -19,6 +20,9 @@ class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         '''Установка'''
         self.browser = webdriver.Firefox()
+        staging_server = os.environ.get('STAGING_SERVER') # адрес реального сервера помещаем в переменную окружения STAGING_SERVER
+        if staging_server:
+            self.live_server_url = 'http://' + staging_server # заменяем сервер по умолчанию (self.live_server_url) на адрес реального сервера
 
     def tearDown(self):
         '''Размонтирование'''
@@ -50,7 +54,7 @@ class NewVisitorTest(StaticLiveServerTestCase):
         # Лена открывает домашнюю страницу
         self.browser.get(self.live_server_url)
         self.browser.set_window_size(1024, 768) # установка фиксированных значений окна
-
+        time.sleep(1)
         # Она замечает, что поле ввода аккуратно центрировано
         inputbox = self.browser.find_element_by_id('id_new_item') #отыскиваем элемент input
         self.assertAlmostEqual( # assertAlmostEqual помогает нам справиться с погрешностями округления и случайными странностями из-за полос прокрутки и т.п.

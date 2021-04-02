@@ -7,7 +7,7 @@
 * Git
 
 ## Ubuntu:
-* в файе ~/.profile добавить строку: lias python='/usr/bin/python3'
+* в файе ~/.profile добавить строку: alias python='/usr/bin/python3'
 * sudo apt update
 * sudo apt -y upgrade
 * sudo apt install -y python-pip python-venv nginx

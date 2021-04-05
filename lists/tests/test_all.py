@@ -2,8 +2,8 @@ from django.template.loader import render_to_string
 from django.test import TestCase
 from django.urls import resolve
 from django.http import HttpRequest
-from .models import Item, List
-from .views import home_page
+from ..models import Item, List
+from ..views import home_page
 
 class HomePageTest(TestCase):
     '''тест домашней страницы'''

@@ -52,6 +52,34 @@ class ListViewTest(TestCase):
                                                                  # в функцию генерирования HTML render – тестовый клиент Django помещает его в объект response,
                                                                  # чтобы помочь с тести­рованием
 
+    def test_can_save_a_POST_request_to_an_existing_list(self):
+        '''тест: можно сохранить POST-запрос в существующий список'''
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+
+        self.client.post(
+            f'/lists/{correct_list.id}/',
+            data={'item_text': 'Новый элемент для существующего списка'}
+        )
+
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'Новый элемент для существующего списка')
+        self.assertEqual(new_item.list, correct_list)
+
+    def test_POST_redirect_to_list_view(self):
+        '''тест: переадресуется в представление списка'''
+        other_list = List.objects.create()
+        correct_list = List.objects.create()
+
+        response = self.client.post(
+            f'/lists/{correct_list.id}/',
+            data={'item_text': 'Новый элемент для существующего списка'}
+        )
+        self.assertRedirects(response, f'/lists/{correct_list.id}/')
+
+
+
 class NewListTest(TestCase):
     '''тест нового списка'''
 
@@ -88,32 +116,3 @@ class NewListTest(TestCase):
         self.client.post('/lists/new', data={'item_text': ''})
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
-
-class NewItemTest(TestCase):
-    '''тест нового элемента списка'''
-
-    def test_can_save_a_POST_request_to_an_existing_list(self):
-        '''тест: можно сохранить POST-запрос в существующий список'''
-        other_list = List.objects.create()
-        correct_list = List.objects.create()
-
-        self.client.post(
-            f'/lists/{correct_list.id}/add_item',
-            data={'item_text': 'Новый элемент для существующего списка'}
-        )
-
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, 'Новый элемент для существующего списка')
-        self.assertEqual(new_item.list, correct_list)
-
-    def test_redirect_to_list_view(self):
-        '''тест: переадресуется в представление списка'''
-        other_list = List.objects.create()
-        correct_list = List.objects.create()
-
-        response = self.client.post(
-            f'/lists/{correct_list.id}/add_item',
-            data={'item_text': 'Новый элемент для существующего списка'}
-        )
-        self.assertRedirects(response, f'/lists/{correct_list.id}/')

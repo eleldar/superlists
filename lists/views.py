@@ -17,7 +17,7 @@ def view_list(request, list_id):
             item = Item(text=request.POST['item_text'], list=list_)
             item.full_clean() # валидация модели из-за особенностей использования ORM с SQL
             item.save()
-            return redirect(f'/lists/{list_.id}/')
+            return redirect(list_) # за кадром используется get_absolute_url
         except ValidationError:
             error = 'Вы не можете вводить пустую строку!'
     context = {'list': list_, 'error': error}
@@ -34,4 +34,4 @@ def new_list(request):
         list_.delete()
         error = 'Вы не можете вводить пустую строку!'
         return render(request, 'lists/home.html', {'error': error})
-    return redirect(f'/lists/{list_.id}/')
+    return redirect(list_) # за кадром используется get_absolute_url

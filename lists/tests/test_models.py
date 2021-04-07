@@ -40,3 +40,8 @@ class ListAndItemModelTest(TestCase):
         with self.assertRaises(ValidationError): # использование менеджера контекста для генерации ошибки в случае невозможности сохранить пустой элемент списка
             item.save()
             item.full_clean() # метод ручного выполнения полной валидации
+
+    def test_get_absolute_url(self):
+        '''тест: получение абсолютного URL'''
+        list_ = List.objects.create()
+        self.assertEqual(list_.get_absolute_url(), f'/lists/{list_.id}/')

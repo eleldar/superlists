@@ -31,7 +31,7 @@ class ItemValidationTest(FunctionalTest):
         self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: Купить молоко')
 
-        # Далее Лена решает отправить второй пустой элемент списка
+        # Далее, находясь на странице списка (не домашняя страница) Лена решает ввести пустой элемент
         self.browser.find_element_by_id('id_new_item').send_keys(Keys.ENTER)
 
         # Она получает аналогичное предупреждение на странице списка

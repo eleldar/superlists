@@ -10,17 +10,25 @@ def home_page(request):
 def view_list(request, list_id):
     '''представление списка'''
     list_ = List.objects.get(id=list_id)
+    error = None
+
     if request.method == 'POST':
-        Item.objects.create(text=request.POST['item_text'], list=list_)
-        return redirect(f'/lists/{list_.id}/')
-    return render(request, 'lists/list.html', {'list': list_})
+        try:
+            item = Item(text=request.POST['item_text'], list=list_)
+            item.full_clean() # валидация модели из-за особенностей использования ORM с SQL
+            item.save()
+            return redirect(f'/lists/{list_.id}/')
+        except ValidationError:
+            error = 'Вы не можете вводить пустую строку!'
+    context = {'list': list_, 'error': error}
+    return render(request, 'lists/list.html', context=context)
 
 def new_list(request):
     '''новый список'''
     list_ = List.objects.create()
-    item = Item.objects.create(text=request.POST['item_text'], list=list_) # создаем новый список для каждой отдельной записи (при отправки POST-запроса), ПОКА!
+    item = Item(text=request.POST['item_text'], list=list_)
     try:
-        item.full_clean() # валидация модели
+        item.full_clean() # валидация модели из-за особенностей использования ORM с SQL
         item.save()
     except ValidationError:
         list_.delete()

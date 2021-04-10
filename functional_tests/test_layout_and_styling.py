@@ -13,7 +13,7 @@ class LayoutAndStylingTest(FunctionalTest):
         self.browser.set_window_size(1024, 768) # установка фиксированных значений окна
         time.sleep(1)
         # Она замечает, что поле ввода аккуратно центрировано
-        inputbox = self.browser.find_element_by_id('id_new_item') #отыскиваем элемент input
+        inputbox = self.get_item_input_box()
         self.assertAlmostEqual( # assertAlmostEqual помогает нам справиться с погрешностями округления и случайными странностями из-за полос прокрутки и т.п.
             inputbox.location['x'] + inputbox.size['width'] / 2, # смотрим на его размер и расположение и проверяем: расположен ли он посередине страницы
             512,
@@ -24,7 +24,7 @@ class LayoutAndStylingTest(FunctionalTest):
         inputbox.send_keys('тестирование')
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: тестирование')
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.get_item_input_box()
         self.assertAlmostEqual(
             inputbox.location['x'] + inputbox.size['width'] / 2,
             512,

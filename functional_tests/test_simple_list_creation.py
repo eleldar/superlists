@@ -20,7 +20,7 @@ class NewVisitorTest(FunctionalTest):
         self.assertIn('Начать новый список дел', header_text)
 
         # Ей сразу же предлагается ввести элемент списка
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.get_item_input_box()
         self.assertEqual(
             inputbox.get_attribute('placeholder'),
             'Введите элемент списка'
@@ -37,7 +37,7 @@ class NewVisitorTest(FunctionalTest):
 
         # Текстовое поле по-прежнему приглашает ее добавить еще один элемент.
         # Она вводит "Сделать мушку из павлиньих перьев" (Лена очень методична)
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.get_item_input_box()
         inputbox.send_keys('Сделать мушку из павлиньих перьев')
         inputbox.send_keys(Keys.ENTER)
 
@@ -51,7 +51,7 @@ class NewVisitorTest(FunctionalTest):
 
         # Лена начинает новый список
         self.browser.get(self.live_server_url)
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.get_item_input_box()
         inputbox.send_keys('Купить павлиньи перья')
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: Купить павлиньи перья')
@@ -75,7 +75,7 @@ class NewVisitorTest(FunctionalTest):
         self.assertNotIn('Сделать мушку', page_text)
 
         # Эльдар начинает новый список, вводя новый элемент
-        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox = self.get_item_input_box()
         inputbox.send_keys('Купить молоко')
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: Купить молоко')

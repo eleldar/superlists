@@ -5,6 +5,7 @@ from django.http import HttpRequest
 from django.utils.html import escape # метод для экранированных символов
 from ..models import Item, List
 from ..views import home_page
+from ..forms import ItemForm, EMPTY_ITEM_ERROR
 
 
 class HomePageTest(TestCase):
@@ -13,8 +14,13 @@ class HomePageTest(TestCase):
     def test_uses_home_template(self):
         '''тест: используется домашний шаблон'''
         response = self.client.get('/')
-        self.assertTemplateUsed(response, 'lists/home.html') # тестовый клиент Django;
-                                                             # имеет недостатки (т.к. есть разница между полноизолированными модульными тестами и интегрированными тестами)
+        self.assertTemplateUsed(response, 'lists/home.html')
+
+
+    def test_home_page_uses_item_form(self):
+        '''тест: домашняя страница использует форму для элемента'''
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm) # проверяет, что форма соответствует классу ItemForm
 
 
 class ListViewTest(TestCase):
@@ -23,8 +29,7 @@ class ListViewTest(TestCase):
         '''тест: используется шаблон списка'''
         list_ = List.objects.create()
         response = self.client.get(f'/lists/{list_.id}/')
-        self.assertTemplateUsed(response, 'lists/list.html') # assertTemplateUsed – одна из наиболее 
-                                                             # полезных функций тестового клиента Django
+        self.assertTemplateUsed(response, 'lists/list.html')
 
     def test_displays_only_items_for_that_list(self):
         '''тест: отображаются элементы только для этого списка'''
@@ -59,7 +64,7 @@ class ListViewTest(TestCase):
 
         self.client.post(
             f'/lists/{correct_list.id}/',
-            data={'item_text': 'Новый элемент для существующего списка'}
+            data={'text': 'Новый элемент для существующего списка'}
         )
 
         self.assertEqual(Item.objects.count(), 1)
@@ -74,18 +79,45 @@ class ListViewTest(TestCase):
 
         response = self.client.post(
             f'/lists/{correct_list.id}/',
-            data={'item_text': 'Новый элемент для существующего списка'}
+            data={'text': 'Новый элемент для существующего списка'}
         )
         self.assertRedirects(response, f'/lists/{correct_list.id}/')
 
-    def test_validation_errors_end_up_on_lists_page(self):
-        '''тест: ошибки валидации оканчиваются на странице списков'''
+    def post_invalid_input(self):
+        '''отправляет недопустимый ввод'''
+        # Создав небольшую вспомогательную функцию post_invalid_input , мы
+        # можем сделать четыре отдельных теста без дублирования большого числа
+        # строк исходного кода.
         list_ = List.objects.create()
-        response = self.client.post(f'/lists/{list_.id}/', data={'item_text': ''})
+        return self.client.post(f'/lists/{list_.id}/', data={'text':''})
+
+    def test_for_invalid_input_nothing_saved_to_db(self):
+        '''тест на недопустимый ввод: ничего не сохраняется в БД'''
+        self.post_invalid_input()
+        self.assertEqual(Item.objects.count(), 0)
+
+    def test_for_invalid_input_renders_list_template(self):
+        '''тест на недопустимый ввод: отображается шаблон списка'''
+        response = self.post_invalid_input()
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'lists/list.html')
-        expected_error = escape('Вы не можете вводить пустую строку!')
-        self.assertContains(response, expected_error)
+
+    def test_for_invalid_input_passes_form_to_template(self):
+        '''тест на недопустимый ввод: форма передается в шаблон'''
+        response = self.post_invalid_input()
+        self.assertIsInstance(response.context['form'], ItemForm)
+
+    def test_for_invalid_input_shows_error_on_page(self):
+        '''тест на недопустимый ввод: на странице показывается ошибка'''
+        response = self.post_invalid_input()
+        self.assertContains(response, escape(EMPTY_ITEM_ERROR))
+
+    def test_displays_item_form(self):
+        '''тест отображения формы для элемента'''
+        list_ = List.objects.create()
+        response = self.client.get(f'/lists/{list_.id}/')
+        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertContains(response, 'name="text"')
 
 
 class NewListTest(TestCase):
@@ -93,7 +125,7 @@ class NewListTest(TestCase):
 
     def test_can_save_a_POST_request(self):
         '''тест: можно сохранить post-запрос'''
-        self.client.post('/lists/new', data={'item_text': 'Новый элемент списка'})
+        self.client.post('/lists/new', data={'text': 'Новый элемент списка'})
         self.assertEqual(Item.objects.count(), 1)
         new_item = Item.objects.first()
         self.assertEqual(new_item.text, 'Новый элемент списка')
@@ -103,7 +135,7 @@ class NewListTest(TestCase):
         # Этот тест должен сообщать, что представление переадресовывает 
         # на URL-адрес конкретного нового списка, который оно только что 
         # создало
-        response = self.client.post('/lists/new', data={'item_text': 'Новый элемент списка'}) # /new без закрывающей косой черты.
+        response = self.client.post('/lists/new', data={'text': 'Новый элемент списка'}) # /new без закрывающей косой черты.
                                                                                               # используется форма записи, суть которой в том, 
                                                                                               # что URL-адреса без такой черты являются 
                                                                                               # URL-адресами «действия», которое изменяет базу данных
@@ -111,16 +143,25 @@ class NewListTest(TestCase):
         self.assertRedirects(response, f'/lists/{new_list.id}/') # заменяет 2 утверждения:
                                                                  # 1. переадресацию
                                                                  # 2. соответствие адресов
-    def test_validation_errors_are_sent_back_to_home_page_template(self):
-        '''тест: ошибки валидации отсылаются назад в шаблон домашней страницы'''
-        response = self.client.post('/lists/new', data={'item_text': ''})
+
+    def test_for_invalid_input_renders_home_template(self):
+        '''тест на недопустимый ввод: отображает домашний шаблон'''
+        response = self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'lists/home.html')
-        expected_error = escape('Вы не можете вводить пустую строку!')
-        self.assertContains(response, expected_error)
+
+    def test_validation_errors_are_shown_on_home_page(self):
+        '''тест: ошибки валидации выводятся на домашней странице'''
+        response = self.client.post('/lists/new', data={'text': ''})
+        self.assertContains(response, escape(EMPTY_ITEM_ERROR))
+
+    def test_for_invalid_input_passes_form_to_template(self):
+        '''тест на недопустимый ввод: форма передается в шаблон'''
+        response = self.client.post('/lists/new', data={'text': ''})
+        self.assertIsInstance(response.context['form'], ItemForm)
 
     def test_invalid_list_items_arent_saved(self):
         '''тест: сохраняются недопустимые элементы списка'''
-        self.client.post('/lists/new', data={'item_text': ''})
+        self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)

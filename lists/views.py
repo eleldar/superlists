@@ -2,36 +2,34 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.core.exceptions import ValidationError
 from .models import Item, List
+from .forms import ItemForm
 
 def home_page(request):
     '''домашняя страница'''
-    return render(request, 'lists/home.html')
+    context = {'form': ItemForm()}
+    return render(request, 'lists/home.html', context=context)
 
 def view_list(request, list_id):
     '''представление списка'''
     list_ = List.objects.get(id=list_id)
-    error = None
-
+    form = ItemForm()
     if request.method == 'POST':
-        try:
-            item = Item(text=request.POST['item_text'], list=list_)
-            item.full_clean() # валидация модели из-за особенностей использования ORM с SQL
-            item.save()
+        form = ItemForm(data=request.POST)
+        if form.is_valid():
+            Item.objects.create(text=request.POST['text'], list=list_)
             return redirect(list_) # за кадром используется get_absolute_url
-        except ValidationError:
-            error = 'Вы не можете вводить пустую строку!'
-    context = {'list': list_, 'error': error}
+    context = {'list': list_, 'form': form}
     return render(request, 'lists/list.html', context=context)
 
 def new_list(request):
     '''новый список'''
-    list_ = List.objects.create()
-    item = Item(text=request.POST['item_text'], list=list_)
-    try:
-        item.full_clean() # валидация модели из-за особенностей использования ORM с SQL
-        item.save()
-    except ValidationError:
-        list_.delete()
-        error = 'Вы не можете вводить пустую строку!'
-        return render(request, 'lists/home.html', {'error': error})
-    return redirect(list_) # за кадром используется get_absolute_url
+    form = ItemForm(data=request.POST) # передаем данные POST-запроса в конструктор формы
+    if form.is_valid(): # проверяем на допустимость введенных данных
+        list_ = List.objects.create()
+        Item.objects.create(text=request.POST['text'], list=list_)
+        return redirect(list_)
+    else:
+        # Если введенное значение недопустимое, передаем форму в шаблон вместо
+        # жестко кодированного строкового значения ошибки
+        context = {'form': form}
+        return render(request, 'lists/home.html', context=context)

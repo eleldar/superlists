@@ -15,13 +15,11 @@
           <div class="text-center">
             <h1>{% block header_text %}{% endblock %}</h1>
             <form method="POST" action="{%block form_action%}{%endblock%}">
-              <input name="item_text" id="id_new_item"
-                     class="form-control input-lg"
-                     placeholder="Введите элемент списка" />
+              {{ form.text }}  {# выводит только входные данные HTML для поля text формы #}
               {% csrf_token %}
-              {% if error %}
+              {% if form.errors %}
                 <div class="form-group has-error">
-                  <span class="help-block">{{ error }}</span>
+                  <span class="help-block">{{ form.text.errors }}</span>
                 </div>
               {% endif %}
             </form>

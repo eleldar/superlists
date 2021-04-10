@@ -62,3 +62,7 @@ class FunctionalTest(StaticLiveServerTestCase):
                     raise e     # поднимаем исключение и даем ему «всплыть» в тесте при превышении лимита времени
                 time.sleep(0.5) # если мы отлавливаем исключение, то ожидаем в течение короткого периода
                                 # и в цикле делаем повторную попытку
+
+    def get_item_input_box(self):
+        '''получить поле ввода для элемента'''
+        return self.browser.find_element_by_id('id_text')

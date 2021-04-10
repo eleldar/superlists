@@ -45,3 +45,35 @@ class ListAndItemModelTest(TestCase):
         '''тест: получение абсолютного URL'''
         list_ = List.objects.create()
         self.assertEqual(list_.get_absolute_url(), f'/lists/{list_.id}/')
+
+    def test_duplicate_items_are_invalid(self):
+        '''тест: повторы элементов недопустимы'''
+        list_ = List.objects.create()
+        Item.objects.create(list=list_, text='Текст для проверки повтора')
+        with self.assertRaises(ValidationError):
+            item = Item(list=list_, text='Текст для проверки повтора')
+            item.full_clean()
+
+    def test_can_save_same_item_to_different_lists(self):
+        '''тест: может сохранять этот же элемент в разные списки'''
+        list1 = List.objects.create()
+        list2 = List.objects.create()
+        Item.objects.create(list=list1, text='Текст для проверки повтора')
+        item = Item(list=list2, text='Текст для проверки повтора')
+        item.full_clean() # не должен поднять исключение, т.к. это другой список
+
+    def test_list_ordering(self):
+        '''тест упорядочения списка'''
+        list1 = List.objects.create()
+        item1 = Item.objects.create(list=list1, text='i1')
+        item2 = Item.objects.create(list=list1, text='i2')
+        item3 = Item.objects.create(list=list1, text='i3')
+        self.assertEqual(
+            list(Item.objects.all()),
+            [item1, item2, item3]
+        )
+
+    def test_string_representation(self):
+        '''тест строкового представления'''
+        item = Item(text='Тест строки')
+        self.assertEqual(str(item), 'Тест строки')

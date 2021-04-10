@@ -1,5 +1,6 @@
 from django.test import TestCase
 from ..forms import ItemForm, EMPTY_ITEM_ERROR
+from ..models import Item, List
 
 class ItemFormTest(TestCase):
     '''тест формы для элемента списка'''
@@ -18,3 +19,12 @@ class ItemFormTest(TestCase):
                                           # и заполнения атрибута errors. Это словарь, который отображает имена полей
                                           # на списки ошибок для этих полей (поле может иметь более одной ошибки).
         self.assertEqual(form.errors['text'], [EMPTY_ITEM_ERROR])
+
+    def test_form_save_handles_saving_to_a_list(self):
+        '''тест: метод save формы обрабатывает сохранение в список'''
+        list_ = List.objects.create()
+        form = ItemForm(data={'text': 'тест сохранения формой'})
+        new_item = form.save(for_list=list_)
+        self.assertEqual(new_item, Item.objects.first())
+        self.assertEqual(new_item.text, 'тест сохранения формой')
+        self.assertEqual(new_item.list, list_)

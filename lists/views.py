@@ -16,7 +16,7 @@ def view_list(request, list_id):
     if request.method == 'POST':
         form = ItemForm(data=request.POST)
         if form.is_valid():
-            Item.objects.create(text=request.POST['text'], list=list_)
+            form.save(for_list=list_)
             return redirect(list_) # за кадром используется get_absolute_url
     context = {'list': list_, 'form': form}
     return render(request, 'lists/list.html', context=context)
@@ -26,7 +26,7 @@ def new_list(request):
     form = ItemForm(data=request.POST) # передаем данные POST-запроса в конструктор формы
     if form.is_valid(): # проверяем на допустимость введенных данных
         list_ = List.objects.create()
-        Item.objects.create(text=request.POST['text'], list=list_)
+        form.save(for_list=list_)
         return redirect(list_)
     else:
         # Если введенное значение недопустимое, передаем форму в шаблон вместо

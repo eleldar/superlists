@@ -5,7 +5,8 @@ from django.http import HttpRequest
 from django.utils.html import escape # метод для экранированных символов
 from ..models import Item, List
 from ..views import home_page
-from ..forms import ItemForm, EMPTY_ITEM_ERROR
+from ..forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
+from unittest import skip
 
 
 class HomePageTest(TestCase):
@@ -102,11 +103,6 @@ class ListViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'lists/list.html')
 
-    def test_for_invalid_input_passes_form_to_template(self):
-        '''тест на недопустимый ввод: форма передается в шаблон'''
-        response = self.post_invalid_input()
-        self.assertIsInstance(response.context['form'], ItemForm)
-
     def test_for_invalid_input_shows_error_on_page(self):
         '''тест на недопустимый ввод: на странице показывается ошибка'''
         response = self.post_invalid_input()
@@ -116,9 +112,24 @@ class ListViewTest(TestCase):
         '''тест отображения формы для элемента'''
         list_ = List.objects.create()
         response = self.client.get(f'/lists/{list_.id}/')
-        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
 
+    def test_duplicate_item_validation_errors_end_up_on_lists_page(self):
+        '''тест: ошибки вализации повторяющегося элемена оканчиваются на странице списков'''
+        list1 = List.objects.create()
+        item1 = Item.objects.create(list=list1, text='проверочный текст')
+        response = self.client.post(
+            f'/lists/{list1.id}/',
+            data={'text': 'проверочный текст'}
+        )
+
+        expected_error = escape(DUPLICATE_ITEM_ERROR)
+
+    def test_for_invalid_input_passes_form_to_template(self):
+        '''тест на недопустимый ввод: форма передается в шаблон'''
+        response = self.post_invalid_input()
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
 
 class NewListTest(TestCase):
     '''тест нового списка'''

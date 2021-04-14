@@ -4,19 +4,17 @@
 <link rel="stylesheet" href="qunit-2.15.0.css">
 <body>
   <div id="qunit"></div>
-
- <div id="qunit-fixture"></div>
-
-<form> <!-- представляют то, что будет на настоящей странице списка -->
-  <input name="text" />
-  <div class="has-error">Текст ошибки</div>
-</form>
+  <div id="qunit-fixture"> <!-- Query обнуляет содержимое div с фикстурами перед каждым тестом -->
+    <form> <!-- представляют то, что будет на настоящей странице списка -->
+      <input name="text" />
+      <div class="has-error">Текст ошибки</div>
+    </form>
+  </div>
 
 <script src="../jquery-3.6.0.min.js"></script> <!-- Загружаем jQuery -->
 <script src="qunit-2.15.0.js"></script>
 
 <script>
-
 QUnit.test("smoke test", function (assert) {
   assert.equal($('.has-error').is(':visible'), true); <!-- Функция $ - функция jQuery; используется для поиска фрагментов DOM -->
                                                       <!-- ищем все элементы, которые имеют класс has-error; возвращает объект, который представляет один или несколько элементов DOM -->
@@ -26,5 +24,13 @@ QUnit.test("smoke test", function (assert) {
   assert.equal($('.has-error').is(':visible'), false); <!-- проверяем, что он работает, используя для этого второе утверждение assert.equal -->
 });
 
+QUnit.test("smoke test", function (assert) {
+  assert.equal($('.has-error').is(':visible'), true); <!-- Функция $ - функция jQuery; используется для поиска фрагментов DOM -->
+                                                      <!-- ищем все элементы, которые имеют класс has-error; возвращает объект, который представляет один или несколько элементов DOM -->
+                                                      <!-- Возвращаемый элемент имеет разные методы; один из таких элементов – .is , который определяет, соответствует ли элемент конкретому свойству CSS. -->
+                                                      <!-- Здесь мы используем :visible , чтобы проверить, показан элемент или скрыт. -->
+  $('.has-error').hide(); <!-- используем метод jQuery .hide(), чтобы скрыть элемент div; он динамически устанавливается на элементе style="display: none" -->
+  assert.equal($('.has-error').is(':visible'), false); <!-- проверяем, что он работает, используя для этого второе утверждение assert.equal -->
+});
 </script>
 </body>

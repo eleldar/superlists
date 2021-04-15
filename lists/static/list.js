@@ -1,13 +1,6 @@
-var initialize = function() {
-  console.log('вызов инициализации');
-/* Эта строка говорит: найдите любой элемент input , чей атрибут name
-равен text , и добавьте слушатель событий, который реагирует на со-
-бытия нажатия клавиши. Слушатель событий является локальной
-(inline) функцией, которая скрывает все элементы, имеющие класс
-.has-error . */
+window.Superlists = {}; // в явном виде объявляем объект свойством глобальной переменной window
+window.Superlists.initialize = function() {
   $('input[name="text"]').on('keypress', function() {
-    console.log('в обработчике нажатия клавиши');
-    $('.has-error').hide();
+    $('.has-error').hide(); // делаем функцию initialize атрибутом объекта Superlists
   });
 };
-console.log('list.js загружен');

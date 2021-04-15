@@ -33,7 +33,19 @@
           {% endblock %}
         </div>
       </div>
+{# Размещение тегов загрузки сценариев в конце тела HTML позволяет пользователю не ждать,  #}
+{# пока весь ваш JavaScript загрузится, чтобы что-то увидеть на странице.                  #}
+{# Это также помогает удостовериться, что большинство DOM загрузилось до того,             #}
+{# как любой сценарий начнет выполняться.                                                  #}
 
+      <script src="/static/jquery-3.6.0.min.js"></script>
+      <script src="/static/list.js"></script>
+
+      <script>
+    $(document).ready(function() {
+      window.Superlists.initialize();
+    });
+      </script>
 
   </body>
 </html>

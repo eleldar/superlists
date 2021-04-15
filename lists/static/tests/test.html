@@ -17,22 +17,15 @@
 <script src="qunit-2.15.0.js"></script>
 
 <script>
-console.log('начало инициализации тестов');
 
 QUnit.test("ошибки должны исчезать при нажатии на клавиатуру", function (assert) {
-  console.log('тест 1');
-  initialize();
-  $('input[name="text"]').trigger('keypress'); <!-- Метод jQuery .trigger используется главным образом для тести- -->
-                                               <!-- рования. Он говорит «запусти событие JavaScript DOM на элементе  -->
-                                               <!-- (элементах)». Здесь мы используем событие нажатие клавиши, кото-  -->
-                                               <!-- рое запускается браузером за кулисами всякий раз, когда пользова-  -->
-                                               <!-- тель что-то вводит в определенный элемент input . -->
+  window.Superlists.initialize();
+  $('input[name="text"]').trigger('keypress');
   assert.equal($('.has-error').is(':visible'), false); 
 });
 
 QUnit.test("ошибки не должны исчезать при отсутствии нажатия на клавиатуру", function (assert) {
-  console.log('тест 2');
-  initialize();
+  window.Superlists.initialize();
   assert.equal($('.has-error').is(':visible'), true); 
 });
 

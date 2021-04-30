@@ -15,11 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path, re_path
-from lists import views as list_views # хорошая практика назначать псевдонимы для высокоуровневого urls.py; 
+from lists import views as list_views # хорошая практика назначать псевдонимы для высокоуровневого urls.py;
 from lists import urls as list_urls   # позволит, если нужно, импортировать представления и URL-адреса из многочисленных приложений
+from accounts import urls as accounts_urls
 
 urlpatterns = [
     path('', list_views.home_page, name='home'),
-    re_path(r'^lists/', include(list_urls)), # include может быть частью регулярного выражения в URL как префикс, 
+    re_path(r'^lists/', include(list_urls)), # include может быть частью регулярного выражения в URL как префикс,
                                              # который будет применяться ко всем включенным URL-адресам
+    re_path(r'^accounts/', include(accounts_urls)),
 ]

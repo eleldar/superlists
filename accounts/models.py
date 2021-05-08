@@ -1,4 +1,5 @@
 from django.db import models
+import uuid # модуль Python для генерации идентификаторов
 
 class User(models.Model):
     """пользователь"""
@@ -7,3 +8,8 @@ class User(models.Model):
     USERNAME_FIELD = 'email'
     is_anonymous = False
     is_authenticated = True
+
+class Token(models.Model):
+    """модель маркера"""
+    email = models.EmailField()
+    uid = models.CharField(default=uuid.uuid4, max_length=40)

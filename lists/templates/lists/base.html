@@ -9,7 +9,18 @@
   </head>
   <body>
     <div class="container">
- 
+
+      <nav class="navbar" role="navigation">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="/">Список дел</a>
+          <form class="d-flex" method="POST" action="#">
+            <span>Введите email:</span>
+            <input class="form-control" name="email" type="text" />
+            {% csrf_token %}
+          </form>
+        </div>
+      </nav>
+
       <div class="row">
         <div class="col-md-6 offset-md-3 p-3 mb-2 bg-secondary bg-gradient text-white">
           <div class="text-center">

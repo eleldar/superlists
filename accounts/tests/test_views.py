@@ -1,4 +1,5 @@
 from django.test import TestCase
+from unittest.mock import patch
 from accounts import views
 
 class SendLoginEmailViewTest(TestCase):
@@ -11,27 +12,15 @@ class SendLoginEmailViewTest(TestCase):
         )
         self.assertRedirects(response, '/')
 
-    def test_sends_mail_to_address_from_post(self):
+    @patch('accounts.views.send_mail') # принимает имя объект; эквивалент ручной подмены send_mail в accounts.views; 
+    def test_sends_mail_to_address_from_post(self, mock_send_mail): # внедряет объект-имитацию в тест как аргумент метода тестирования; можно выбрать любое имя
         """тест: отправляется сообщение на адрес из метода post"""
-        self.send_mail_called = False
-
-        def fake_send_mail(subject, body, from_email, to_list):
-            """поддельная функция send_mail; похожа на реальную функцию send_mail,
-            но она всего лишь сохраняет некоторую информацию о том, как ее вызвали, 
-            с использованием нескольких переменных, заданных на свойстве self"""
-            self.send_mail_called = True
-            self.subject = subject
-            self.body = body
-            self.from_email = from_email
-            self.to_list = to_list
-
-        views.send_mail = fake_send_mail # подменяем реальную функцию accounts.views.send_mail поддельной версией – это сводится к простой операции присваивания ей значения
-
-        self.client.post('/accounts/send_login_email',
+        self.client.post('/accounts/send_login_email', # Вызываем тестируемую функцию как обычно, но ко всему, что есть внутри этого метода тестирования, применяется наша имитация, поэтому представление не вызовет реальный send_mail, вместо этого будет видеть mock_send_mail.
             data={'email': 'eleldar@mail.ru'}
         )
 
-        self.assertTrue(self.send_mail_called)
-        self.assertEqual(self.subject, 'Ваша ссылка для доступа к списку дел')
-        self.assertEqual(self.from_email, 'noreply@superlists')
-        self.assertEqual(self.to_list, ['eleldar@mail.ru'])
+        self.assertEqual(mock_send_mail.called, True) # делаем выводы о том, что произошло с объектомими­тацией во время теста; видим, что он вызывается
+        (subject, body, from_email, to_list), kwargs = mock_send_mail.call_args # распаковываем его различные позиционные и именованные аргументы вызова для исследования того, с чем она была вызвана
+        self.assertEqual(subject, 'Ваша ссылка для доступа к списку дел')
+        self.assertEqual(from_email, 'noreply@superlists')
+        self.assertEqual(to_list, ['eleldar@mail.ru'])

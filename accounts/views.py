@@ -12,8 +12,9 @@ def send_login_email(request):
         'noreply@superlists',
         [email],
     )
-    messages.success(
+    messages.add_message( # инфраструктура сообщений предоставляет более одного способа достигнуть того же результата
         request,
+        messages.SUCCESS,
         "Проверьте свою почту. В сообщении находится ссылка, которая позволит войти на сайт."
     )
     return redirect('/')

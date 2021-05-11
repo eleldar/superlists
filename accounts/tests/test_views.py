@@ -40,14 +40,23 @@ class SendLoginEmailViewTest(TestCase):
         self.assertEqual(message.message, SUCCESS_MESSAGE)
         self.assertEqual(message.tags, "success")
 
-    @patch('accounts.views.messages')
-    def test_adds_success_message_with_mock(self, mock_messages):
-        """имитируем модуль messages; проверяем, что функция messages.success вызвана с правильными аргументами: 
-           первоначальный запрос и сообщение, которое мы хотим."""
-        response = self.client.post('/accounts/send_login_email',
-            data={'email': 'eleldar@mail.ru'
-        })
 
-        self.assertEqual(mock_messages.success.call_args,
-            call(response.wsgi_request, SUCCESS_MESSAGE)
-        )
+
+# Cледующий тест (тест с имитациями) не срабатывает, потому что больше не вызываем messages.success,
+# а вызываем messages.add_message с другим количеством аргументов.
+# Использование имитаций может привести к сильно связанной реализации.
+# Лучше тестировать поведение, а не детали реализации. Тестируйте то, что происходит,
+# а не то, как вы это делаете. Нередко имитации допускают слишком много ошибок на стороне «как»,
+# а не на стороне «что».
+
+#    @patch('accounts.views.messages')
+#    def test_adds_success_message_with_mock(self, mock_messages):
+#        """имитируем модуль messages; проверяем, что функция messages.success вызвана с правильными аргументами: 
+#           первоначальный запрос и сообщение, которое мы хотим."""
+#        response = self.client.post('/accounts/send_login_email',
+#            data={'email': 'eleldar@mail.ru'
+#        })
+#
+#        self.assertEqual(mock_messages.success.call_args,
+#            call(response.wsgi_request, SUCCESS_MESSAGE)
+#        )

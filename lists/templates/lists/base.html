@@ -21,6 +21,20 @@
         </div>
       </nav>
 
+      {% if messages %}
+        <div class="row">
+          <div class="col-md-8">
+            {% for message in messages %}
+              {% if messages.level_tag == 'success' %}
+                <div class="alert alert-success">{{ message }}</div>
+              {% else %}
+                <div class="alert alert-success">{{ message }}</div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+
       <div class="row">
         <div class="col-md-6 offset-md-3 p-3 mb-2 bg-secondary bg-gradient text-white">
           <div class="text-center">

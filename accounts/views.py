@@ -2,14 +2,19 @@ from .models import Token
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
+from django.urls import reverse
+
 
 def send_login_email(request):
     """отправить сообщение для входа в систему"""
     email = request.POST['email']
     token = Token.objects.create(email=email)
+    url = request.build_absolute_uri( # применяется в Django для создания «полного» URL-адреса, включая доменное имя и часть с http(s)
+        reverse('login') + '?token=' + str(token.uid)
+    )
     send_mail(
         'Ваша ссылка для доступа к списку дел',
-        'Используйте эту ссылку для входа:',
+        f'Используйте эту ссылку для входа: {url}',
         'noreply@superlists',
         [email],
     )

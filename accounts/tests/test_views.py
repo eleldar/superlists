@@ -24,3 +24,19 @@ class SendLoginEmailViewTest(TestCase):
         self.assertEqual(subject, 'Ваша ссылка для доступа к списку дел')
         self.assertEqual(from_email, 'noreply@superlists')
         self.assertEqual(to_list, ['eleldar@mail.ru'])
+
+    def test_adds_success_message(self):
+        """тест: добавляется сообщение об успехе"""
+        response = self.client.post('/accounts/send_login_email',
+            data={'email': 'eleldar@mail.ru'},
+            follow=True) # передавая follow=True в тестовый клиент получаем возможность исследовать
+                         # страницу после переадресации с кодом 302:  исследовать ее контекст на
+                         # наличие списка сообщений (который мы должны преобразовать в список,
+                         # чтобы он начал вести себя так, как надо) -|
+                                                          #          |
+        message = list(response.context['messages'])[0]   #   <------|
+        self.assertEqual(
+            message.message,
+            "Проверьте свою почту. В сообщении находится ссылка, которая позволит войти на сайт."
+        )
+        self.assertEqual(message.tags, "success")

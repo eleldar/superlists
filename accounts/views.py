@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 
@@ -10,5 +11,9 @@ def send_login_email(request):
         'Используйте эту ссылку для входа:',
         'noreply@superlists',
         [email],
+    )
+    messages.success(
+        request,
+        "Проверьте свою почту. В сообщении находится ссылка, которая позволит войти на сайт."
     )
     return redirect('/')

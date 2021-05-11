@@ -17,6 +17,7 @@ def send_login_email(request):
         messages.SUCCESS,
         "Проверьте свою почту. В сообщении находится ссылка, которая позволит войти на сайт."
     )
+    return redirect('/')
 
 
 def login(request):

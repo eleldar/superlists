@@ -1,6 +1,7 @@
 from django.test import TestCase
 from unittest.mock import patch, call
-from accounts import views
+from .. import views
+from .. models import Token
 
 SUCCESS_MESSAGE = "Проверьте свою почту. В сообщении находится ссылка, которая позволит войти на сайт."
 
@@ -68,3 +69,27 @@ class LoginViewTest(TestCase):
         """тест: переадресуется на домашнюю страницу"""
         response = self.client.get('/accounts/login?token=avrwvrgwef21124255')
         self.assertRedirects(response, '/')
+
+    def test_creates_token_associated_with_email(self):
+        """тест: создается маркер, связанный с электронной почтой"""
+        # проверяет, что маркер, который мы создаем в базе данных, 
+        # связан с адресом электронной почты из POST-запроса.
+        self.client.post('/accounts/send_login_email',
+            data={'email': 'eleldar@mail.ru'}
+        )
+        token = Token.objects.first()
+        self.assertEqual(token.email, 'eleldar@mail.ru')
+
+    @patch('accounts.views.send_mail')
+    def test_sends_link_to_login_using_token_uid(self, mock_send_mail):
+        """тест: отсылается ссылка на вход в систему, используя uid маркера"""
+        # имитируем функцию send_mail , используя декоратор patch;
+        # из всех аргументов вызова нас интересует аргумент body
+        self.client.post('/accounts/send_login_email',
+            data = {'email': 'eleldar@mail.ru'}
+        )
+
+        token = Token.objects.first()
+        expected_url = f'http://testserver/accounts/login?token={token.uid}'
+        (subject, body, from_email, to_list), kwargs = mock_send_mail.call_args
+        self.assertIn()

@@ -1,6 +1,8 @@
 from django.test import TestCase
-from unittest.mock import patch
+from unittest.mock import patch, call
 from accounts import views
+
+SUCCESS_MESSAGE = "Проверьте свою почту. В сообщении находится ссылка, которая позволит войти на сайт."
 
 class SendLoginEmailViewTest(TestCase):
     """тест представления, отправляющего сообщение для входа в систему"""
@@ -35,8 +37,17 @@ class SendLoginEmailViewTest(TestCase):
                          # чтобы он начал вести себя так, как надо) -|
                                                           #          |
         message = list(response.context['messages'])[0]   #   <------|
-        self.assertEqual(
-            message.message,
-            "Проверьте свою почту. В сообщении находится ссылка, которая позволит войти на сайт."
-        )
+        self.assertEqual(message.message, SUCCESS_MESSAGE)
         self.assertEqual(message.tags, "success")
+
+    @patch('accounts.views.messages')
+    def test_adds_success_message_with_mock(self, mock_messages):
+        """имитируем модуль messages; проверяем, что функция messages.success вызвана с правильными аргументами: 
+           первоначальный запрос и сообщение, которое мы хотим."""
+        response = self.client.post('/accounts/send_login_email',
+            data={'email': 'eleldar@mail.ru'
+        })
+
+        self.assertEqual(mock_messages.success.call_args,
+            call(response.wsgi_request, SUCCESS_MESSAGE)
+        )

@@ -31,3 +31,17 @@ class AuthenticateTest(TestCase):
         token = Token.objects.create(email=email)
         user = PasswordlessAuthenticationBackend().authenticate(REQUEST, token.uid)
         self.assertEqual(user, existing_user)
+
+class GetUserTest(TestCase):
+    """тест получения пользователя"""
+
+    def test_get_user_by_email(self):
+        """тест: получает пользователя по адресу электронной почты"""
+        User.objects.create(email='1@1.com')
+        desired_user = User.objects.create(email='eleldar@mail.ru')
+        found_user = PasswordlessAuthenticationBackend().get_user('eleldar@mail.ru')
+        self.assertEqual(found_user, desired_user)
+
+    def test_returns_None_if_no_user_with_that_email(self):
+        """тест: возвращается None, если нет пользователя с таким адресом эл.почты"""
+        self.assertIsNone(PasswordlessAuthenticationBackend().get_user('eleldar@mail.ru'))

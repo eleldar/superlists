@@ -93,3 +93,12 @@ class LoginViewTest(TestCase):
         expected_url = f'http://testserver/accounts/login?token={token.uid}'
         (subject, body, from_email, to_list), kwargs = mock_send_mail.call_args
         self.assertIn(expected_url, body)
+
+    @patch('accounts.views.auth') # ожидаем, что модуль django.contrib.auth будет использован в views.py, и мы его там имитируем. Обратите внимание: на этот раз мы имитируем не функцию, а целый модуль, а следовательно, неявным образом имитируем все функции (и любые другие объекты), который этот модуль содержит.
+    def test_calls_authenticate_with_uid_from_ret_request(self, mock_auth): # имитируемый объект внедряется в метод тестирования.
+        """тест: вызывается authentication c uid, полученный в GET-запросе"""
+        self.client.get('/accounts/login?token=avrwvrgwef21124255')
+        self.assertEqual(
+            mock_auth.authenticate.call_args, # исследуем call_args не из модуля mock_auth, а из функции mock_auth
+            call(uid='avrwvrgwef21124255') # call - функция из модуля mock; более аккуратный способ сообщить, с какими аргу­ментами ее нужно было вызвать
+        )

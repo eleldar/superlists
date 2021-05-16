@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 from django.urls import reverse
+from django.contrib import auth
 
 
 def send_login_email(request):
@@ -27,4 +28,7 @@ def send_login_email(request):
 
 
 def login(request):
+    """зарегистрировать пользователя в системе"""
+    token = request.GET.get('token')
+    auth.authenticate(uid=token)
     return redirect('/')

@@ -41,35 +41,6 @@ class SendLoginEmailViewTest(TestCase):
         self.assertEqual(message.message, SUCCESS_MESSAGE)
         self.assertEqual(message.tags, "success")
 
-
-
-# Cледующий тест (тест с имитациями) не срабатывает, потому что больше не вызываем messages.success,
-# а вызываем messages.add_message с другим количеством аргументов.
-# Использование имитаций может привести к сильно связанной реализации.
-# Лучше тестировать поведение, а не детали реализации. Тестируйте то, что происходит,
-# а не то, как вы это делаете. Нередко имитации допускают слишком много ошибок на стороне «как»,
-# а не на стороне «что».
-
-#    @patch('accounts.views.messages')
-#    def test_adds_success_message_with_mock(self, mock_messages):
-#        """имитируем модуль messages; проверяем, что функция messages.success вызвана с правильными аргументами: 
-#           первоначальный запрос и сообщение, которое мы хотим."""
-#        response = self.client.post('/accounts/send_login_email',
-#            data={'email': 'eleldar@mail.ru'
-#        })
-#
-#        self.assertEqual(mock_messages.success.call_args,
-#            call(response.wsgi_request, SUCCESS_MESSAGE)
-#        )
-
-class LoginViewTest(TestCase):
-    """тест представления входа в систему"""
-
-    def test_redirects_to_home_page(self):
-        """тест: переадресуется на домашнюю страницу"""
-        response = self.client.get('/accounts/login?token=avrwvrgwef21124255')
-        self.assertRedirects(response, '/')
-
     def test_creates_token_associated_with_email(self):
         """тест: создается маркер, связанный с электронной почтой"""
         # проверяет, что маркер, который мы создаем в базе данных, 
@@ -94,7 +65,35 @@ class LoginViewTest(TestCase):
         (subject, body, from_email, to_list), kwargs = mock_send_mail.call_args
         self.assertIn(expected_url, body)
 
-    @patch('accounts.views.auth') # ожидаем, что модуль django.contrib.auth будет использован в views.py, и мы его там имитируем. Обратите внимание: на этот раз мы имитируем не функцию, а целый модуль, а следовательно, неявным образом имитируем все функции (и любые другие объекты), который этот модуль содержит.
+
+# Cледующий тест (тест с имитациями) не срабатывает, потому что больше не вызываем messages.success,
+# а вызываем messages.add_message с другим количеством аргументов.
+# Использование имитаций может привести к сильно связанной реализации.
+# Лучше тестировать поведение, а не детали реализации. Тестируйте то, что происходит,
+# а не то, как вы это делаете. Нередко имитации допускают слишком много ошибок на стороне «как»,
+# а не на стороне «что».
+
+#    @patch('accounts.views.messages')
+#    def test_adds_success_message_with_mock(self, mock_messages):
+#        """имитируем модуль messages; проверяем, что функция messages.success вызвана с правильными аргументами: 
+#           первоначальный запрос и сообщение, которое мы хотим."""
+#        response = self.client.post('/accounts/send_login_email',
+#            data={'email': 'eleldar@mail.ru'
+#        })
+#
+#        self.assertEqual(mock_messages.success.call_args,
+#            call(response.wsgi_request, SUCCESS_MESSAGE)
+#        )
+
+@patch('accounts.views.auth') # заплатка на уровень класса
+class LoginViewTest(TestCase):
+    """тест представления входа в систему"""
+
+    def test_redirects_to_home_page(self, mock_auth): # в первый метод тестирования внедрен дополнительный аргумент
+        """тест: переадресуется на домашнюю страницу"""
+        response = self.client.get('/accounts/login?token=avrwvrgwef21124255')
+        self.assertRedirects(response, '/')
+
     def test_calls_authenticate_with_uid_from_ret_request(self, mock_auth): # имитируемый объект внедряется в метод тестирования.
         """тест: вызывается authentication c uid, полученный в GET-запросе"""
         self.client.get('/accounts/login?token=avrwvrgwef21124255')
@@ -103,7 +102,6 @@ class LoginViewTest(TestCase):
             call(uid='avrwvrgwef21124255') # call - функция из модуля mock; более аккуратный способ сообщить, с какими аргу­ментами ее нужно было вызвать
         )
 
-    @patch('accounts.views.auth')
     def test_calls_auth_login_with_user_if_there_is_one(self, mock_auth):
         """тест: вызывается auth_login, если такой существует"""
         response = self.client.get('/accounts/login?token=avrwvrgwef21124255')
@@ -111,3 +109,9 @@ class LoginViewTest(TestCase):
             mock_auth.login.call_args, # исследуем аргументы вызова для функции auth.login
             call(response.wsgi_request, mock_auth.authenticate.return_value) # Проверяем, что она вызывается с объектом запроса, который видим в представлении, и с объектом «пользователь», который возвращается функцией authenticate . Поскольку функция authenticate также имитируется, мы можем использовать ее специальный атрибут return_value
         )
+
+    def test_does_not_login_if_user_not_authenticated(self, mock_auth):
+        """тест: регистрация не выполняется, если пользователь не аутенифицирован"""
+        mock_auth.authenticate.return_value = None # явным образом устанавливаем return_value на имитации auth.authenticate перед вызовом self.client.get
+        self.client.get('/accounts/login?token=avrwvrgwef21124255')
+        self.assertEqual(mock_auth.login.called, False) # если authenticate не возвращает None, то нам вообще не следует вызывать auth.login

@@ -31,5 +31,6 @@ def login(request):
     """зарегистрировать пользователя в системе"""
     token = request.GET.get('token')
     user = auth.authenticate(uid=token)
-    auth.login(request, user)
+    if user:
+        auth.login(request, user)
     return redirect('/')

@@ -102,3 +102,12 @@ class LoginViewTest(TestCase):
             mock_auth.authenticate.call_args, # исследуем call_args не из модуля mock_auth, а из функции mock_auth
             call(uid='avrwvrgwef21124255') # call - функция из модуля mock; более аккуратный способ сообщить, с какими аргу­ментами ее нужно было вызвать
         )
+
+    @patch('accounts.views.auth')
+    def test_calls_auth_login_with_user_if_there_is_one(self, mock_auth):
+        """тест: вызывается auth_login, если такой существует"""
+        response = self.client.get('/accounts/login?token=avrwvrgwef21124255')
+        self.assertEqual(
+            mock_auth.login.call_args, # исследуем аргументы вызова для функции auth.login
+            call(response.wsgi_request, mock_auth.authenticate.return_value) # Проверяем, что она вызывается с объектом запроса, который видим в представлении, и с объектом «пользователь», который возвращается функцией authenticate . Поскольку функция authenticate также имитируется, мы можем использовать ее специальный атрибут return_value
+        )

@@ -30,5 +30,6 @@ def send_login_email(request):
 def login(request):
     """зарегистрировать пользователя в системе"""
     token = request.GET.get('token')
-    auth.authenticate(uid=token)
+    user = auth.authenticate(uid=token)
+    auth.login(request, user)
     return redirect('/')

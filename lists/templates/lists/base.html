@@ -16,7 +16,7 @@
           {% if user.email %}
             <ul class="navbar navbar-nav">
               <li class="navbar-text">Вход выполнен через {{ user.email }}</li>
-              <li><a href="#">Выйти</a></li>
+              <li><a href="{% url 'logout' %}">Выйти</a></li>
             </ul>
           {% else %}
             <form class="d-flex" method="POST" action="{% url 'send_login_email' %}">

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, login
 from ..models import Token
 
 User = get_user_model()
@@ -16,6 +16,13 @@ class UserModelTest(TestCase):
         """тест: электронная почта явялется первичным ключом"""
         user = User(email="a@b.com")
         self.assertEqual(user.pk, 'a@b.com')
+
+    def test_no_problem_with_auth_login(self):
+        '''тест: нет проблем с auth_login'''
+        user = User.objects.create(email='eleldar@mail.ru') # объект пользователя
+        user.backend = ''
+        request = self.client.request().wsgi_request # объект запроса
+        login(request, user) # не должно поднять исключение
 
 class TokenModelTest(TestCase):
     """тест модели маркера"""

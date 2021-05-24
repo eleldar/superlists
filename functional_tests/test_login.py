@@ -1,7 +1,6 @@
 from django.core import mail
 from selenium.webdriver.common.keys import Keys
 import re
-
 from .base import FunctionalTest
 
 TEST_EMAIL = 'eleldar@mail.ru'
@@ -48,4 +47,3 @@ class LoginTest(FunctionalTest):
 
         # Она вышла из системы
         self.wait_to_be_logged_out(email=TEST_EMAIL)
-

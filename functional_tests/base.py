@@ -11,6 +11,20 @@ MAX_WAIT = 10 # максимальным количеством времени, 
               # 10 секунд более чем достаточно для отлавливания любых незначительных сбоев или
               # случайных замедлений
 
+def wait(fn):
+    '''декоратор ожидания'''
+    def modified_fn(*args, **kwargs):
+        start_time = time.time()
+        while True:
+            try:
+                return fn(*args, **kwargs)
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
+    return modified_fn
+
+
 class FunctionalTest(StaticLiveServerTestCase):
     '''Функциональный тест'''
 
@@ -25,61 +39,33 @@ class FunctionalTest(StaticLiveServerTestCase):
         '''Размонтирование'''
         self.browser.quit()
 
-    def wait_for_row_in_list_table(self, row_text):
-        '''ожидать строку в таблице списка'''
-        start_time = time.time()
-        while True:
-            try:
-                tag_id = 'id_list_table'
-                table = self.browser.find_element_by_id(tag_id)
-                rows = table.find_elements_by_tag_name('tr')
-                self.assertIn(row_text, [row.text for row in rows])
-                return
-            except(AssertionError, WebDriverException) as e: # отлавливаем два типа исключений:
-                                                             # 1. WebDriverException для случая, когдастраница не загрузилась и
-                                                             # Selenium не может найти табличный элемент на странице,
-                                                             # 2. AssertionError – для случая, когда таблица имеется,
-                                                             # но это, возможно, таблица до перезагрузок страницы,
-                                                             # поэтому в ней пока нет нашей строки
-                if time.time() - start_time > MAX_WAIT: # 6
-                    raise e     # поднимаем исключение и даем ему «всплыть» в тесте при превышении лимита времени
-                time.sleep(0.5) # если мы отлавливаем исключение, то ожидаем в течение короткого периода
-                                # и в цикле делаем повторную попытку
-
-    def wait_for(self, fn): # ожидает, что ему будет передана функция
-        '''обобщенный метод ожидания'''
-        start_time = time.time()
-        while True:
-            try: # тело блока try/except используется для вызова функции, которую передали
-                return fn() # возвращаем  значение и выходим из цикла
-            except(AssertionError, WebDriverException) as e: # отлавливаем два типа исключений:
-                                                             # 1. WebDriverException для случая, когда страница не загрузилась и
-                                                             # Selenium не может найти табличный элемент на странице,
-                                                             # 2. AssertionError – для случая, когда таблица имеется,
-                                                             # но это, возможно, таблица до перезагрузок страницы,
-                                                             # поэтому в ней пока нет нашей строки
-                if time.time() - start_time > MAX_WAIT: # 6
-                    raise e     # поднимаем исключение и даем ему «всплыть» в тесте при превышении лимита времени
-                time.sleep(0.5) # если мы отлавливаем исключение, то ожидаем в течение короткого периода
-                                # и в цикле делаем повторную попытку
-
     def get_item_input_box(self):
         '''получить поле ввода для элемента'''
         return self.browser.find_element_by_id('id_text')
 
+    @wait
+    def wait_for_row_in_list_table(self, row_text):
+        '''ожидать строку в таблице списка'''
+        tag_id = 'id_list_table'
+        table = self.browser.find_element_by_id(tag_id)
+        rows = table.find_elements_by_tag_name('tr')
+        self.assertIn(row_text, [row.text for row in rows])
 
+    @wait
+    def wait_for(self, fn): # ожидает, что ему будет передана функция
+        '''обобщенный метод ожидания'''
+        return fn() # возвращаем  значение и выходим из цикла
+
+    @wait
     def wait_to_be_logged_in(self, email):
         """ожидать входа в систему"""
-        self.wait_for(
-            lambda: self.browser.find_element_by_link_text('Выйти')
-        )
+        self.browser.find_element_by_link_text('Выйти')
         navbar = self.browser.find_element_by_css_selector('.navbar')
         self.assertIn(email, navbar.text)
 
+    @wait
     def wait_to_be_logged_out(self, email):
         """ожидать выхода из системы"""
-        self.wait_for(
-            lambda: self.browser.find_element_by_name('email')
-        )
+        self.browser.find_element_by_name('email')
         navbar = self.browser.find_element_by_css_selector('.navbar')
         self.assertNotIn(email, navbar.text)

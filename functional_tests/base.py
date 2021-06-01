@@ -31,9 +31,9 @@ class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self):
         '''Установка'''
         self.browser = webdriver.Firefox()
-        staging_server = os.environ.get('STAGING_SERVER') # адрес реального сервера помещаем в переменную окружения STAGING_SERVER
-        if staging_server:
-            self.live_server_url = 'http://' + staging_server # заменяем сервер по умолчанию (self.live_server_url) на адрес реального сервера
+        self.staging_server = os.environ.get('STAGING_SERVER') # адрес реального сервера помещаем в переменную окружения STAGING_SERVER
+        if self.staging_server:
+            self.live_server_url = 'http://' + self.staging_server # заменяем сервер по умолчанию (self.live_server_url) на адрес реального сервера
 
     def tearDown(self):
         '''Размонтирование'''

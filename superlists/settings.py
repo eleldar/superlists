@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     # my apps
     'lists',
     'accounts',
+    'functional_tests',
 
     # default apps
     # 'django.contrib.admin', # пока отключим его; для collectstatic

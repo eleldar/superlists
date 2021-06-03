@@ -6,6 +6,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.common.exceptions import WebDriverException
 import os
 from unittest import skip # декоратор пропуска фрагментов кода
+from .server_tools import reset_database # функция для обнуления серверной базы данных в промежутках между каждым тестом.
 
 MAX_WAIT = 10 # максимальным количеством времени, которое готовы ожидать. 
               # 10 секунд более чем достаточно для отлавливания любых незначительных сбоев или
@@ -34,7 +35,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.staging_server = os.environ.get('STAGING_SERVER') # адрес реального сервера помещаем в переменную окружения STAGING_SERVER
         if self.staging_server:
             self.live_server_url = 'http://' + self.staging_server # заменяем сервер по умолчанию (self.live_server_url) на адрес реального сервера
-
+            reset_database(self.staging_server) # обнуление базы данных на сервере
     def tearDown(self):
         '''Размонтирование'''
         self.browser.quit()

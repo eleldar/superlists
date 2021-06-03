@@ -18,6 +18,7 @@
 ## Служба Systemd
 * в файле gunicorn-systemd.template.service
 * заменить SITENAME, например, на на post-o-gram.com
+* заменить SEKRIT почтовым паролем
 
 ## Структура папок:
 /home/server

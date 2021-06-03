@@ -25,7 +25,7 @@ class LoginTest(FunctionalTest):
         try:
             inbox.user(test_email)
             inbox.pass_(os.environ['YAHOO_PASSWORD'])
-            while time.time() - start < 60:
+            while time.time() - start < 160:
                 # получаем 10 новых сообщений
                 count, _ = inbox.stat()
                 for i in reversed(range(max(1, count - 10), count + 1)):

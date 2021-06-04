@@ -54,9 +54,7 @@ class ItemValidationTest(FunctionalTest):
         '''тест: нельзя добавлять повторяющиеся элементы'''
         # Лена открывает домашнюю страницу и начинает новый список
         self.browser.get(self.live_server_url)
-        self.get_item_input_box().send_keys('Купить книгу')
-        self.get_item_input_box().send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Купить книгу')
+        self.add_list_item('Купить книгу')
 
         # Она случайно пытается ввести повторяющийся элемент
         self.get_item_input_box().send_keys('Купить книгу')
@@ -72,9 +70,7 @@ class ItemValidationTest(FunctionalTest):
         '''тест: сообщения об ошибках очищаются при вводе'''
         # Лена начинает список и вызывает ошибку валидации
         self.browser.get(self.live_server_url)
-        self.get_item_input_box().send_keys('Проверка ввода')
-        self.get_item_input_box().send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Проверка ввода')
+        self.add_list_item('Проверка ввода')
         self.get_item_input_box().send_keys('Проверка ввода')
         self.get_item_input_box().send_keys(Keys.ENTER)
 
@@ -83,7 +79,9 @@ class ItemValidationTest(FunctionalTest):
         ))
 
         # Она начинает набирать в поле ввода, чтобы очистить ошибку
-        self.get_item_input_box().send_keys('a')
+        self.get_item_input_box().send_keys('а')
 
         # Она довольна от того, что сообщение об ошибке исчезает
-        self.wait_for(lambda: self.assertFalse(self.get_error_element().is_displayed())) # is_displayed() сообщает, что элемент видим или невидим
+        self.wait_for(lambda: self.assertFalse(
+            self.get_error_element().is_displayed() # is_displayed() сообщает, что элемент видим или невидим
+        ))

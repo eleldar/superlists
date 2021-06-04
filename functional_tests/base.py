@@ -52,6 +52,17 @@ class FunctionalTest(StaticLiveServerTestCase):
         rows = table.find_elements_by_tag_name('tr')
         self.assertIn(row_text, [row.text for row in rows])
 
+    def add_list_item(self, item_text):
+        '''добавить элемент списка 
+        (реализует детали ввода текста в нужное поле)'''
+        num_rows = len(self.browser.find_elements_by_css_selector(
+            '#id_list_table tr'
+        ))
+        self.get_item_input_box().send_keys(item_text)
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        item_number = num_rows + 1
+        self.wait_for_row_in_list_table(f'{item_number}: {item_text}')
+
     @wait
     def wait_for(self, fn): # ожидает, что ему будет передана функция
         '''обобщенный метод ожидания'''

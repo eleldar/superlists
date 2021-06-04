@@ -33,3 +33,7 @@ def new_list(request):
         # жестко кодированного строкового значения ошибки
         context = {'form': form}
         return render(request, 'lists/home.html', context=context)
+
+def my_lists(request, email):
+    '''мои списки'''
+    return render(request, 'lists/my_lists.html')

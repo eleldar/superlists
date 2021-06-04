@@ -176,3 +176,10 @@ class NewListTest(TestCase):
         self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
+
+class MyListsTest(TestCase):
+
+    def test_my_lists_url_renders_my_lists_template(self):
+        '''тест: переход по ссылке отображает шаблон'''
+        response = self.client.get('/lists/users/1@1.com/')
+        self.assertTemplateUsed(response, 'lists/my_lists.html')

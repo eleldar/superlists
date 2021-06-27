@@ -49,15 +49,17 @@
         <div class="col-md-6 offset-md-3 p-3 mb-2 bg-secondary bg-gradient text-white">
           <div class="text-center">
             <h1>{% block header_text %}{% endblock %}</h1>
-            <form method="POST" action="{%block form_action%}{%endblock%}">
-              {{ form.text }}  {# выводит только входные данные HTML для поля text формы #}
-              {% csrf_token %}
-              {% if form.errors %}
-                <div class="form-group has-error">
-                  <span class="help-block">{{ form.text.errors }}</span>
-                </div>
-              {% endif %}
-            </form>
+            {% block list_form%}
+              <form method="POST" action="{%block form_action%}{%endblock%}">
+                {{ form.text }}  {# выводит только входные данные HTML для поля text формы #}
+                {% csrf_token %}
+                {% if form.errors %}
+                  <div class="form-group has-error">
+                    <span class="help-block">{{ form.text.errors }}</span>
+                  </div>
+                {% endif %}
+              </form>
+            {% endblock %}
           </div>
         </div>
       </div>
@@ -68,6 +70,14 @@
           {% endblock %}
         </div>
       </div>
+
+      <div class="row">
+        <div class="col-md-6 offset-md-3">
+          {% block extra_content %}
+          {% endblock %}
+        </div>
+      </div>
+
     </div>
 {# Размещение тегов загрузки сценариев в конце тела HTML позволяет пользователю не ждать,  #}
 {# пока весь ваш JavaScript загрузится, чтобы что-то увидеть на странице.                  #}

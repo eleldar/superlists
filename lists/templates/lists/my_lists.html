@@ -1,3 +1,14 @@
 {% extends 'lists/base.html' %}
 
 {% block header_text %}Мои списки{% endblock %}
+
+{% block list_form %}{% endblock %}
+
+{% block extra_content %}
+  <h2>Списки пользователя: {{ owner.email }}</h2> {# хотим, чтобы в шаблоне переменная с именем owner представляла пользователя#}
+  <ul>
+    {% for list in owner.list_set.all %} {# хотим иметь возможность выполнять итерацию по списку, создаваемому пользователем; в Django ORM есть специальный инструмент #}
+      <li><a href="{{ list.get_absolute_url }}">{{ list.name }}</a></li> {# хотим использовать list.name для распечатки названия списка, который в настоящее время указывается как текст его первого элемента #}
+    {% endfor %}
+  </ul>
+{% endblock %}

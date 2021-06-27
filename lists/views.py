@@ -27,7 +27,9 @@ def new_list(request):
     '''новый список'''
     form = ItemForm(data=request.POST) # передаем данные POST-запроса в конструктор формы
     if form.is_valid(): # проверяем на допустимость введенных данных
-        list_ = List.objects.create()
+        list_ = List()
+        list_.owner = request.user
+        list_.save()
         form.save(for_list=list_)
         return redirect(list_)
     else:

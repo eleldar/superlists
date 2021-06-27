@@ -7,6 +7,8 @@ from ..models import Item, List
 from ..views import home_page
 from ..forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 from unittest import skip
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 class HomePageTest(TestCase):
@@ -178,8 +180,17 @@ class NewListTest(TestCase):
         self.assertEqual(Item.objects.count(), 0)
 
 class MyListsTest(TestCase):
+    '''тест приложения Мои списки'''
 
     def test_my_lists_url_renders_my_lists_template(self):
         '''тест: переход по ссылке отображает шаблон'''
+        User.objects.create(email='1@1.com')
         response = self.client.get('/lists/users/1@1.com/')
         self.assertTemplateUsed(response, 'lists/my_lists.html')
+
+    def test_passes_correct_owner_to_template(self):
+        '''тест: передается правильный владелец в шаблон'''
+        User.objects.create(email='wrong@owner.com')
+        correct_user = User.objects.create(email='1@1.com')
+        response = self.client.get('/lists/users/1@1.com/')
+        self.assertEqual(response.context['owner'], correct_user)

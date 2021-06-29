@@ -9,6 +9,7 @@ from ..forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_
 from unittest import skip
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
+import unittest
 User = get_user_model()
 
 
@@ -134,8 +135,8 @@ class ListViewTest(TestCase):
         response = self.post_invalid_input()
         self.assertIsInstance(response.context['form'], ExistingListItemForm)
 
-class NewListTest(TestCase):
-    '''тест моего списка'''
+class NewListViewIntegratedTest(TestCase):
+    '''интегрированный тест нового представления списка'''
 
     def test_can_save_a_POST_request(self):
         '''тест: можно сохранить post-запрос'''
@@ -180,24 +181,14 @@ class NewListTest(TestCase):
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
 
-    @patch('lists.views.List') # Имитируем класс List, чтобы иметь возможность получать доступ к любым спискам, которые могли бы быть созданы представлением.
-    @patch('lists.views.ItemForm') # Имитируем ItemForm, иначе форма поднимет ошибку, когда мы вызовем form.save(), потому что она не может использовать имитирующий mock-объект в качестве внешнего ключа для элемента Item, который она хочет создать. 
-    def test_list_owner_is_saved_if_user_is_authenticated(
-        self, mockItemFormClass, mockListClass # Mock-объекты внедряются в аргументы теста в порядке, обратном тому, в котором они объявлены.
-    ):
+    @unittest.skip
+    def test_list_owner_is_saved_if_user_is_authenticated(self):
         '''тест:для списка сохраняется владелец, если пользователь аутентифицирован'''
         user = User.objects.create(email='1@1.com')
         self.client.force_login(user) # force_login - тестовый клиент выполняет запросы с зарегистрированным пользователем
-        mock_list = mockListClass.return_value
-
-        def check_owner_assigned(): # функция - утверждение об элементе, который мы хотим, чтобы произошел в первую очередь: проверка, что владелец списка был установлен
-            '''проверить, что владелец назначен'''
-            self.assertEqual(mock_list.owner, user) # можем сделать утверждение, что на нем действительно установлен атрибут .owner .
-        mock_list.save.side_effect = check_owner_assigned # для проверки того, что произойдет после вызова имитируемой функции save.
-
         self.client.post('/lists/new', data={'text': 'Новый элемент списка'})
-
-        mock_list.save.assert_called_once_with() # удостоверяемся, что функция side_effect была фактически инициирована, то есть сделали .save().
+        list_ = List.objects.first()
+        self.assertEqual(list_.owner, user)
 
 
 class MyListsTest(TestCase):

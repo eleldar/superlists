@@ -31,7 +31,7 @@ def new_list(request):
         list_.owner = request.user
         list_.save()
         form.save(for_list=list_)
-        return redirect(list_)
+        return redirect(str(list_.get_absolute_url()))
     else:
         # Если введенное значение недопустимое, передаем форму в шаблон вместо
         # жестко кодированного строкового значения ошибки

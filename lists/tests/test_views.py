@@ -7,6 +7,7 @@ from ..models import Item, List
 from ..views import home_page
 from ..forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 from unittest import skip
+from unittest.mock import patch
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
@@ -179,14 +180,21 @@ class NewListTest(TestCase):
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
 
-    def test_list_owner_is_saved_if_user_is_authenticated(self):
-        '''тест:для списка сохраняется владелец,
-           если пользователь аутентифицирован'''
+    @patch('lists.views.List') # Имитируем класс List, чтобы иметь возможность получать доступ к любым спискам, которые могли бы быть созданы представлением.
+    @patch('lists.views.ItemForm') # Имитируем ItemForm, иначе форма поднимет ошибку, когда мы вызовем form.save(), потому что она не может использовать имитирующий mock-объект в качестве внешнего ключа для элемента Item, который она хочет создать. 
+    def test_list_owner_is_saved_if_user_is_authenticated(
+        self, mockItemFormClass, mockListClass # Mock-объекты внедряются в аргументы теста в порядке, обратном тому, в котором они объявлены.
+    ):
+        '''тест:для списка сохраняется владелец, если пользователь аутентифицирован'''
         user = User.objects.create(email='1@1.com')
         self.client.force_login(user) # force_login - тестовый клиент выполняет запросы с зарегистрированным пользователем
+
         self.client.post('/lists/new', data={'text': 'Новый элемент списка'})
-        list_ = List.objects.first()
-        self.assertEqual(list_.owner, user)
+
+        mock_list = mockListClass.return_value # Экземпляр списка, к которому представление будет иметь доступ, будет возвращаемым значением имитируемого класса List
+        self.assertEqual(mock_list.owner, user) # можем сделать утверждение, что на нем действительно установлен атрибут .owner .
+
+
 
 class MyListsTest(TestCase):
     '''тест приложения Мои списки'''

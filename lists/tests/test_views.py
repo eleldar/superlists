@@ -188,12 +188,16 @@ class NewListTest(TestCase):
         '''тест:для списка сохраняется владелец, если пользователь аутентифицирован'''
         user = User.objects.create(email='1@1.com')
         self.client.force_login(user) # force_login - тестовый клиент выполняет запросы с зарегистрированным пользователем
+        mock_list = mockListClass.return_value
+
+        def check_owner_assigned(): # функция - утверждение об элементе, который мы хотим, чтобы произошел в первую очередь: проверка, что владелец списка был установлен
+            '''проверить, что владелец назначен'''
+            self.assertEqual(mock_list.owner, user) # можем сделать утверждение, что на нем действительно установлен атрибут .owner .
+        mock_list.save.side_effect = check_owner_assigned # для проверки того, что произойдет после вызова имитируемой функции save.
 
         self.client.post('/lists/new', data={'text': 'Новый элемент списка'})
 
-        mock_list = mockListClass.return_value # Экземпляр списка, к которому представление будет иметь доступ, будет возвращаемым значением имитируемого класса List
-        self.assertEqual(mock_list.owner, user) # можем сделать утверждение, что на нем действительно установлен атрибут .owner .
-
+        mock_list.save.assert_called_once_with() # удостоверяемся, что функция side_effect была фактически инициирована, то есть сделали .save().
 
 
 class MyListsTest(TestCase):

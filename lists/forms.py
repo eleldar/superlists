@@ -26,6 +26,11 @@ class ItemForm(forms.models.ModelForm):
         }
 
 
+class NewListForm:
+    '''форма для нового списка'''
+    pass
+
+
 class ExistingListItemForm(ItemForm):
     '''форма для элемента существующего списка'''
 

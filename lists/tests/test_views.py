@@ -10,6 +10,7 @@ from unittest import skip
 from unittest.mock import patch
 from django.contrib.auth import get_user_model
 import unittest
+from lists.views import new_list2
 User = get_user_model()
 
 
@@ -206,3 +207,17 @@ class MyListsTest(TestCase):
         correct_user = User.objects.create(email='1@1.com')
         response = self.client.get('/lists/users/1@1.com/')
         self.assertEqual(response.context['owner'], correct_user)
+
+@patch('lists.views.NewListForm') # имитируем класс NewListForm; будет использоваться во всех тестах, поэтому имитируем его на уровне класса
+class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощает написание интегрированных тестов
+    '''модульный тест нового представления списка'''
+
+    def setUp(self):
+        '''установка'''
+        self.request = HttpRequest()
+        self.request.POST['text'] = 'Новый элемент списка' # для базового POST-запроса вместо тестового клиента Django
+
+    def test_passes_POST_data_to_NewListForm(self, mockNewListForm):
+        '''тест: передаются POST-данные в новую форму списка'''
+        new_list2(self.request)
+        mockNewListForm.assert_called_once_with(data=self.request.POST) # проверка на правильную инициализацию NewListForm

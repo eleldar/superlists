@@ -38,6 +38,10 @@ def new_list(request):
         context = {'form': form}
         return render(request, 'lists/home.html', context=context)
 
+def new_list2(request):
+    '''новый список 2'''
+    pass
+
 def my_lists(request, email):
     '''мои списки'''
     owner = User.objects.get(email=email)

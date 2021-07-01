@@ -7,7 +7,7 @@ from ..models import Item, List
 from ..views import home_page
 from ..forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 from unittest import skip
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from django.contrib.auth import get_user_model
 import unittest
 from lists.views import new_list2
@@ -216,8 +216,16 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
         '''установка'''
         self.request = HttpRequest()
         self.request.POST['text'] = 'Новый элемент списка' # для базового POST-запроса вместо тестового клиента Django
+        self.request.user = Mock()
 
     def test_passes_POST_data_to_NewListForm(self, mockNewListForm):
         '''тест: передаются POST-данные в новую форму списка'''
         new_list2(self.request)
         mockNewListForm.assert_called_once_with(data=self.request.POST) # проверка на правильную инициализацию NewListForm
+
+    def test_saves_form_with_owner_if_form_valid(self, mockNewListForm):
+        '''тест: сохраняет форму с владельцем, если форма допустима'''
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True
+        new_list2(self.request)
+        mock_form.save.assert_called_once_with(owner=self.request.user)

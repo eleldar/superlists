@@ -40,7 +40,8 @@ def new_list(request):
 
 def new_list2(request):
     '''новый список 2'''
-    NewListForm(data=request.POST)
+    form = NewListForm(data=request.POST)
+    form.save(owner=request.user)
 
 def my_lists(request, email):
     '''мои списки'''

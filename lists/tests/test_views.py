@@ -242,3 +242,25 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
 
         self.assertEqual(response, mock_redirect.return_value) # проверка того, что отклик из представления является результатом функции redirect
         mock_redirect.assert_called_once_with(str(mock_form.save.return_value)) # проверка того, что функция переадресации была вызвана объектом, который форма возвращает при выполнении save
+
+    @patch('lists.views.render')
+    def test_renders_home_template_with_form_if_form_invalid(
+        self, mock_render, mockNewListForm
+    ):
+        '''тест: отображает домашний шаблон с формой, если форма недоступна'''
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        response = new_list2(self.request)
+
+        self.assertEqual(response, mock_render.return_value)
+
+        mock_render.assert_called_once_with(
+            self.request, 'lists/home.html', {'form': mock_form}
+        )
+
+    def test_does_not_save_if_form_invalid(self, mockNewListForm):
+        '''тест: не сохраняет, если форма недопустима'''
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        new_list2(self.request)
+        self.assertFalse(mock_form.save.called)

@@ -229,3 +229,16 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
         mock_form.is_valid.return_value = True
         new_list2(self.request)
         mock_form.save.assert_called_once_with(owner=self.request.user)
+
+    @patch('lists.views.redirect') # имитация функции переадресации на уровне метода
+    def test_redirects_to_form_returned_object_if_form_valid(
+        self, mock_redirect, mockNewListForm # имитация переадресации внедряется перед mockNewListForm
+    ):
+        '''тест: переадресует в возвращаемый формой объект при допустимой форме'''
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True # указываем, что тестируем случай, где форма допустима
+
+        response = new_list2(self.request)
+
+        self.assertEqual(response, mock_redirect.return_value) # проверка того, что отклик из представления является результатом функции redirect
+        mock_redirect.assert_called_once_with(str(mock_form.save.return_value)) # проверка того, что функция переадресации была вызвана объектом, который форма возвращает при выполнении save

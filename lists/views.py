@@ -41,7 +41,8 @@ def new_list(request):
 def new_list2(request):
     '''новый список 2'''
     form = NewListForm(data=request.POST)
-    form.save(owner=request.user)
+    list_ = form.save(owner=request.user)
+    return redirect(str(list_))
 
 def my_lists(request, email):
     '''мои списки'''

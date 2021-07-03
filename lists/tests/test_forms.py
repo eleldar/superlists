@@ -1,6 +1,11 @@
+import unittest
+from unittest.mock import patch, Mock
 from django.test import TestCase
-from ..forms import ItemForm, ExistingListItemForm, EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 from ..models import Item, List
+from ..forms import (
+    DUPLICATE_ITEM_ERROR, EMPTY_ITEM_ERROR,
+    ExistingListItemForm, ItemForm, NewListForm
+)
 
 class ItemFormTest(TestCase):
     '''тест формы для элемента списка'''
@@ -59,3 +64,35 @@ class ExistingListFormTest(TestCase):
         form = ExistingListItemForm(for_list=list_, data={'text': 'сохранение'})
         new_item = form.save()
         self.assertEqual(new_item, Item.objects.all()[0])
+
+class NewListFormTest(unittest.TestCase):
+    '''тест формы для нового списка'''
+
+    @patch('lists.forms.List.create_new') # имитируем класс List из уровня модели
+    def test_save_creates_new_list_from_post_data_if_user_authenticated(
+        self, mock_List_create_new
+    ):
+        '''тест: save создает новый список из POST-запроса,
+           если пользователь не аутентифицирован'''
+        user = Mock(is_authenticated=False)
+        form = NewListForm(data={'text': 'Новый элемент списка'})
+        form.is_valid() # чтобы форма заполнила словарь cleaned_data, где она хранит проверенные данные
+        form.save(owner=user)
+        mock_List_create_new.assert_called_once_with(
+            first_item_text = 'Новый элемент списка'
+        )
+
+    @patch('lists.forms.List.create_new')
+    def test_save_creates_new_list_with_owner_if_user_authenticated(
+        self, mock_List_create_new
+    ):
+        '''тест: save создает новый список с владельцем,
+           если пользователь аутентифицирован'''
+        user = Mock(is_authenticated=True)
+        form = NewListForm(data={'text': 'Новый элемент списка'})
+        form.is_valid() # чтобы форма заполнила словарь cleaned_data, где она хранит проверен>
+        form.save(owner=user)
+        mock_List_create_new.assert_called_once_with(
+            first_item_text = 'Новый элемент списка', owner=user
+        )
+

@@ -66,3 +66,11 @@ class ListModelTest(TestCase):
             list(Item.objects.all()),
             [item1, item2, item3]
         )
+
+    def test_create_new_creates_list_and_first_item(self):
+        '''тест: create_new создает список и первый элемент'''
+        List.create_new(first_item_text='Новый элемент списка')
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'Новый элемент списка')
+        new_list = List.objects.first()
+        self.assertEqual(new_item.list, new_list)

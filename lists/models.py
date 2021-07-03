@@ -10,9 +10,11 @@ class List(models.Model):
         '''получить абсолютный url'''
         return reverse('view_list', args=[self.id])
 
-    def create_new():
-        '''создать новый'''
-        pass
+    @staticmethod # необязателен!
+    def create_new(first_item_text):
+        '''создать новый список'''
+        list_ = List.objects.create()
+        Item.objects.create(text=first_item_text, list=list_)
 
 
 class Item(models.Model):

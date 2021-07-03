@@ -10,6 +10,10 @@ class List(models.Model):
         '''получить абсолютный url'''
         return reverse('view_list', args=[self.id])
 
+    def create_new():
+        '''создать новый'''
+        pass
+
 
 class Item(models.Model):
     '''элемент списка'''

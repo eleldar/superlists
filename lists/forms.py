@@ -1,6 +1,7 @@
 from django import forms
 from .models import Item
 from django.core.exceptions import ValidationError
+from lists.models import Item, List
 
 EMPTY_ITEM_ERROR = 'Вы не можете вводить пустую строку!'
 DUPLICATE_ITEM_ERROR = 'У Вас уже есть этот элемент в списке'
@@ -26,9 +27,14 @@ class ItemForm(forms.models.ModelForm):
         }
 
 
-class NewListForm:
+class NewListForm(ItemForm):
     '''форма для нового списка'''
-    pass
+    def save(self, owner):
+        if owner.is_authenticated:
+            List.create_new(first_item_text=self.cleaned_data['text'],
+            owner=owner)
+        else:
+            List.create_new(first_item_text=self.cleaned_data['text'])
 
 
 class ExistingListItemForm(ItemForm):

@@ -28,7 +28,8 @@ def new_list(request):
     form = ItemForm(data=request.POST) # передаем данные POST-запроса в конструктор формы
     if form.is_valid(): # проверяем на допустимость введенных данных
         list_ = List()
-        list_.owner = request.user
+        if request.user.is_authenticated:
+            list_.owner = request.user
         list_.save()
         form.save(for_list=list_)
         return redirect(str(list_.get_absolute_url()))

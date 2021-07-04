@@ -238,9 +238,8 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
         mock_form.is_valid.return_value = True #-> форма должна иметь функцию is_valid(), которая возвращает, соответственно, True или False, опираясь на входные данные
 
         response = new_list2(self.request)
-
         self.assertEqual(response, mock_redirect.return_value) # проверка того, что отклик из представления является результатом функции redirect
-        mock_redirect.assert_called_once_with(str(mock_form.save.return_value)) #-> метод .save формы должен возвращать новый объект списка, к которому наше представление переадресует пользователя
+        mock_redirect.assert_called_once_with(str(mock_form.save.return_value.get_absolute_url())) #-> метод .save формы должен возвращать новый объект списка, к которому наше представление переадресует пользователя
 
     @patch('lists.views.render')
     def test_renders_home_template_with_form_if_form_invalid(

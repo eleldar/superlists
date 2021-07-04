@@ -94,4 +94,6 @@ class ListModelTest(TestCase):
 
     def test_create_returns_new_list_object(self):
         '''тест: create возвращает новый объект списка'''
-        self.fail()
+        returned = List.create_new(first_item_text='Новый элемент списка')
+        new_list = List.objects.first()
+        self.assertEqual(returned, new_list)

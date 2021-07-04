@@ -18,6 +18,7 @@ class List(models.Model):
         '''создать новый список'''
         list_ = List.objects.create(owner=owner)
         Item.objects.create(text=first_item_text, list=list_)
+        return list_
 
 
 class Item(models.Model):

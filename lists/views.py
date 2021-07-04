@@ -44,7 +44,7 @@ def new_list2(request):
     form = NewListForm(data=request.POST)
     if form.is_valid():
         list_ = form.save(owner=request.user)
-        return redirect(str(list_))
+        return redirect(str(list_.get_absolute_url()))
     return render(request, 'lists/home.html', {'form': form})
 
 def my_lists(request, email):

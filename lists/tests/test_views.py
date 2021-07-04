@@ -146,41 +146,11 @@ class NewListViewIntegratedTest(TestCase):
         new_item = Item.objects.first()
         self.assertEqual(new_item.text, 'Новый элемент списка')
 
-    def test_redirect_after_POST(self):
-        '''тест: переадресует после post-запроса'''
-        # Этот тест должен сообщать, что представление переадресовывает 
-        # на URL-адрес конкретного нового списка, который оно только что 
-        # создало
-        response = self.client.post('/lists/new', data={'text': 'Новый элемент списка'}) # /new без закрывающей косой черты.
-                                                                                              # используется форма записи, суть которой в том, 
-                                                                                              # что URL-адреса без такой черты являются 
-                                                                                              # URL-адресами «действия», которое изменяет базу данных
-        new_list = List.objects.first()
-        self.assertRedirects(response, f'/lists/{new_list.id}/') # заменяет 2 утверждения:
-                                                                 # 1. переадресацию
-                                                                 # 2. соответствие адресов
-
-    def test_for_invalid_input_renders_home_template(self):
-        '''тест на недопустимый ввод: отображает домашний шаблон'''
+    def test_for_invalid_input_doesnt_save_but_shows_errors(self):
+        '''тест: недопустимый ввод не сохраняется, но показывает ошибки'''
         response = self.client.post('/lists/new', data={'text': ''})
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'lists/home.html')
-
-    def test_validation_errors_are_shown_on_home_page(self):
-        '''тест: ошибки валидации выводятся на домашней странице'''
-        response = self.client.post('/lists/new', data={'text': ''})
-        self.assertContains(response, escape(EMPTY_ITEM_ERROR))
-
-    def test_for_invalid_input_passes_form_to_template(self):
-        '''тест на недопустимый ввод: форма передается в шаблон'''
-        response = self.client.post('/lists/new', data={'text': ''})
-        self.assertIsInstance(response.context['form'], ItemForm)
-
-    def test_invalid_list_items_arent_saved(self):
-        '''тест: сохраняются недопустимые элементы списка'''
-        self.client.post('/lists/new', data={'text': ''})
         self.assertEqual(List.objects.count(), 0)
-        self.assertEqual(Item.objects.count(), 0)
+        self.assertContains(response, escape(EMPTY_ITEM_ERROR))
 
     def test_list_owner_is_saved_if_user_is_authenticated(self):
         '''тест:для списка сохраняется владелец, если пользователь аутентифицирован'''

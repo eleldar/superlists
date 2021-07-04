@@ -25,26 +25,12 @@ def view_list(request, list_id):
 
 def new_list(request):
     '''новый список'''
-    form = ItemForm(data=request.POST) # передаем данные POST-запроса в конструктор формы
-    if form.is_valid(): # проверяем на допустимость введенных данных
-        list_ = List()
-        if request.user.is_authenticated:
-            list_.owner = request.user
-        list_.save()
-        form.save(for_list=list_)
-        return redirect(str(list_.get_absolute_url()))
-    else:
-        # Если введенное значение недопустимое, передаем форму в шаблон вместо
-        # жестко кодированного строкового значения ошибки
-        context = {'form': form}
-        return render(request, 'lists/home.html', context=context)
-
-def new_list2(request):
-    '''новый список 2'''
-    form = NewListForm(data=request.POST)
+    form = NewListForm(data=request.POST) # передаем данные POST-запроса в конструктор формы
     if form.is_valid():
         list_ = form.save(owner=request.user)
         return redirect(str(list_.get_absolute_url()))
+    # Если введенное значение недопустимое, передаем форму в шаблон вместо
+    # жестко кодированного строкового значения ошибки
     return render(request, 'lists/home.html', {'form': form})
 
 def my_lists(request, email):

@@ -10,7 +10,7 @@ from unittest import skip
 from unittest.mock import patch, Mock
 from django.contrib.auth import get_user_model
 import unittest
-from lists.views import new_list2
+from lists.views import new_list
 User = get_user_model()
 
 
@@ -219,14 +219,14 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
 
     def test_passes_POST_data_to_NewListForm(self, mockNewListForm):
         '''тест: передаются POST-данные в новую форму списка'''
-        new_list2(self.request)
+        new_list(self.request)
         mockNewListForm.assert_called_once_with(data=self.request.POST) #-> Необходимо инициализировать форму путем передачи ей POST-запроса в качестве данных
 
     def test_saves_form_with_owner_if_form_valid(self, mockNewListForm):
         '''тест: сохраняет форму с владельцем, если форма допустима'''
         mock_form = mockNewListForm.return_value
         mock_form.is_valid.return_value = True #-> форма должна иметь функцию is_valid(), которая возвращает, соответственно, True или False, опираясь на входные данные
-        new_list2(self.request)
+        new_list(self.request)
         mock_form.save.assert_called_once_with(owner=self.request.user) # форма должна иметь метод .save, который будет принимать запрос request.user, который может быть зарегистрированным или нет, и обрабатывать его соответствующим образом
 
     @patch('lists.views.redirect') # имитация функции переадресации на уровне метода
@@ -237,7 +237,7 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
         mock_form = mockNewListForm.return_value
         mock_form.is_valid.return_value = True #-> форма должна иметь функцию is_valid(), которая возвращает, соответственно, True или False, опираясь на входные данные
 
-        response = new_list2(self.request)
+        response = new_list(self.request)
         self.assertEqual(response, mock_redirect.return_value) # проверка того, что отклик из представления является результатом функции redirect
         mock_redirect.assert_called_once_with(str(mock_form.save.return_value.get_absolute_url())) #-> метод .save формы должен возвращать новый объект списка, к которому наше представление переадресует пользователя
 
@@ -248,7 +248,7 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
         '''тест: отображает домашний шаблон с формой, если форма недоступна'''
         mock_form = mockNewListForm.return_value
         mock_form.is_valid.return_value = False
-        response = new_list2(self.request)
+        response = new_list(self.request)
 
         self.assertEqual(response, mock_render.return_value)
 
@@ -260,5 +260,5 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
         '''тест: не сохраняет, если форма недопустима'''
         mock_form = mockNewListForm.return_value
         mock_form.is_valid.return_value = False
-        new_list2(self.request)
+        new_list(self.request)
         self.assertFalse(mock_form.save.called)

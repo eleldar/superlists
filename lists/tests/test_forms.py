@@ -96,3 +96,12 @@ class NewListFormTest(unittest.TestCase):
             first_item_text = 'Новый элемент списка', owner=user
         )
 
+    @patch('lists.forms.List.create_new')
+    def test_save_returns_new_list_object(self, mock_List_create_new):
+        '''тест: save возвращает новый объект списка;
+           проверяет, что наша форма возвращает новый сохраненный список'''
+        user = Mock(is_authenticated=True)
+        form = NewListForm(data={'text': 'Новый элемент списка'})
+        form.is_valid()
+        response = form.save(owner=user)
+        self.assertEqual(response, mock_List_create_new.return_value) # но у нас есть негласный контракт с методом модели (List.create_new); мы хотим, чтобы он вернул новый объект списка. Для этого добавим тест-заготовку для тестирования модели

@@ -91,3 +91,7 @@ class ListModelTest(TestCase):
     def test_list_owner_is_optional(self):
         '''тест: владелец списка необязательный'''
         List().full_clean() # не должно поднять исключение; не сохраняет объект в отличие от List.objects.create()
+
+    def test_create_returns_new_list_object(self):
+        '''тест: create возвращает новый объект списка'''
+        self.fail()

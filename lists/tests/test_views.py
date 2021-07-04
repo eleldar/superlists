@@ -182,7 +182,6 @@ class NewListViewIntegratedTest(TestCase):
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
 
-    @unittest.skip
     def test_list_owner_is_saved_if_user_is_authenticated(self):
         '''тест:для списка сохраняется владелец, если пользователь аутентифицирован'''
         user = User.objects.create(email='1@1.com')
@@ -221,14 +220,14 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
     def test_passes_POST_data_to_NewListForm(self, mockNewListForm):
         '''тест: передаются POST-данные в новую форму списка'''
         new_list2(self.request)
-        mockNewListForm.assert_called_once_with(data=self.request.POST) # проверка на правильную инициализацию NewListForm
+        mockNewListForm.assert_called_once_with(data=self.request.POST) #-> Необходимо инициализировать форму путем передачи ей POST-запроса в качестве данных
 
     def test_saves_form_with_owner_if_form_valid(self, mockNewListForm):
         '''тест: сохраняет форму с владельцем, если форма допустима'''
         mock_form = mockNewListForm.return_value
-        mock_form.is_valid.return_value = True
+        mock_form.is_valid.return_value = True #-> форма должна иметь функцию is_valid(), которая возвращает, соответственно, True или False, опираясь на входные данные
         new_list2(self.request)
-        mock_form.save.assert_called_once_with(owner=self.request.user)
+        mock_form.save.assert_called_once_with(owner=self.request.user) # форма должна иметь метод .save, который будет принимать запрос request.user, который может быть зарегистрированным или нет, и обрабатывать его соответствующим образом
 
     @patch('lists.views.redirect') # имитация функции переадресации на уровне метода
     def test_redirects_to_form_returned_object_if_form_valid(
@@ -236,12 +235,12 @@ class NewListViewUnitTest(unittest.TestCase): # TestCase сильно упрощ
     ):
         '''тест: переадресует в возвращаемый формой объект при допустимой форме'''
         mock_form = mockNewListForm.return_value
-        mock_form.is_valid.return_value = True # указываем, что тестируем случай, где форма допустима
+        mock_form.is_valid.return_value = True #-> форма должна иметь функцию is_valid(), которая возвращает, соответственно, True или False, опираясь на входные данные
 
         response = new_list2(self.request)
 
         self.assertEqual(response, mock_redirect.return_value) # проверка того, что отклик из представления является результатом функции redirect
-        mock_redirect.assert_called_once_with(str(mock_form.save.return_value)) # проверка того, что функция переадресации была вызвана объектом, который форма возвращает при выполнении save
+        mock_redirect.assert_called_once_with(str(mock_form.save.return_value)) #-> метод .save формы должен возвращать новый объект списка, к которому наше представление переадресует пользователя
 
     @patch('lists.views.render')
     def test_renders_home_template_with_form_if_form_invalid(
